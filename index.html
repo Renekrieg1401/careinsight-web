@@ -1,0 +1,2483 @@
+<!-- render-pipeline-check: 2026-07-16 v3.3 --><!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#131B27" />
+  <title>CareInsight — Der Blick hinter die Pflege</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* FORMA_DARK_TAKEOVER (2026-09-14, René-Direktive, Cross-Silo-Zugriff
+       forma/ autorisiert) — löst v67.146 DARK_MODE_TAKEOVER + SEALED v4.16
+       CONTRAST_RECOVERY_LIGHT_MODE endgültig ab, 1:1 wie zuvor bei
+       iris-web/index.html umgesetzt (echtes FORMA-Standard-Dark-Theme,
+       s. forma/DesignTokens.ts). Rollennamen unverändert, nur Werte getauscht. */
+    :root {
+      --mint:      #131B27;
+      --mint-primary: #A8BEDD;
+      --mid:       #5B7290;
+      --petrol:    #FFFFFF;
+      --petrol-dk: #E0E0E0;
+      --text:      #E0E0E0;
+      --white:     #253144;
+      --lime:      #E6ACBE;
+      --max-w:     1080px;
+      --glass-bg:  rgba(19,27,39,0.55);
+      --glass-bd:  rgba(124,147,184,0.16);
+    }
+
+    html { scroll-behavior: smooth; }
+    /* Anker-Ziele landeten hinter dem Sticky-Header (echte Höhe ~103px Desktop/~66px Mobile,
+       bisheriges scroll-margin-top:56px auf einzelnen Sections war zu klein + inkonsistent
+       gesetzt) — jetzt einheitlich für alle Section-Anker. */
+    section[id] { scroll-margin-top: 112px; }
+    @media (max-width: 1199px) { section[id] { scroll-margin-top: 76px; } }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--mint);
+      color: var(--text);
+      font-size: 18px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── FORMA NEUMORPH CARD (2026-09-14, analog iris-web .lw-card) ── */
+    .glass {
+      position: relative; overflow: hidden;
+      background: rgba(19,27,39,0.55);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(124,147,184,0.16);
+      border-radius: 16px;
+      transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease, border-color .3s ease, backdrop-filter .3s ease;
+      transform-style: preserve-3d;
+      box-shadow: -6px -6px 10px rgba(124,147,184,0.22), 22px 22px 40px rgba(0,0,0,0.65);
+    }
+    .glass::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+      z-index: 1;
+    }
+    .glass:hover { transform: perspective(600px) rotateX(4deg) rotateY(-2deg) translateY(-4px) scale(1.02); box-shadow: -8px -8px 12px rgba(124,147,184,0.32), 26px 26px 46px rgba(0,0,0,0.80); border-color: #A8BEDD; }
+    .glass:active { transform: perspective(800px) rotateX(2deg) scale(0.96); box-shadow: 0 4px 14px rgba(0,0,0,0.6); border-color: #A8BEDD; }
+
+    /* ── CARD ── */
+    .card {
+      padding: 1.5rem 1.75rem;
+      background: var(--glass-bg);
+      
+      border: 1px solid var(--glass-bd);
+      border-radius: 16px;
+    }
+
+    /* ── HEADER/HERO — echter FORMA-Gradient (analog iris-web .lw-hero), 2026-09-14.
+       KEINE Hue-Rotate-Animation (iris-web-Lehre, s. forma/DesignTokens.ts) ── */
+    .site-header {
+      position: sticky; top: 0; z-index: 100; overflow: hidden;
+      background: linear-gradient(100deg, #2B4570, #17273F);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.75);
+    }
+    .site-header::before {
+      content: ''; position: absolute; inset: -20%; z-index: -1;
+      background: linear-gradient(120deg, #131B27, #1B2535, #2B4570, #131B27);
+      background-size: 300% 300%; opacity: 0.15;
+    }
+    .site-header::after {
+      content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+      z-index: 1;
+    }
+    .wave-1 { animation: wave-flow 46s ease-in-out infinite; }
+    .wave-2 { animation: wave-flow 36s ease-in-out infinite reverse; }
+    .wave-3 { animation: wave-flow 28s ease-in-out infinite; }
+    @keyframes wave-flow { 0%,100% { transform: translateX(0); } 50% { transform: translateX(-30px); } }
+    .header-inner {
+      max-width: var(--max-w); margin: 0 auto;
+      padding: 0.5rem 1.25rem; min-height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 0.5rem;
+    }
+    .logo { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; flex-shrink: 0; }
+    .logo-mark { width: 34px; height: 30px; flex-shrink: 0; }
+    .logo-heart {
+      transform-box: fill-box; transform-origin: center;
+      animation: heartPulse 1.8s ease-in-out infinite, heartGlow 1.8s ease-in-out infinite;
+      filter: drop-shadow(0 0 8px #A8BEDD);
+    }
+    @keyframes heartPulse { 0%,100% { transform: scale(1); } 25% { transform: scale(1.08); } 40% { transform: scale(1); } }
+    @keyframes heartGlow { 0%,100% { stroke-opacity: 0.85; } 25% { stroke-opacity: 1; } 40% { stroke-opacity: 0.85; } }
+    .logo-textblock { display:flex; flex-direction:column; line-height:1.15; }
+    .logo-text { font-family: 'Michroma', sans-serif; font-weight: 400; font-size: 0.92rem; letter-spacing: 0.02em; color: var(--petrol); }
+    .logo-text span { color: var(--petrol); }
+    .logo-tag { font-size:0.6rem; font-weight:600; letter-spacing:0.02em; color:#E0E0E0; margin-top:1px; }
+
+    nav { display: flex; align-items: center; gap: 0.25rem; flex-wrap: wrap; min-width: 0; }
+    nav a {
+      padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.8rem;
+      font-weight: 500; color:var(--text); text-decoration: none;
+      white-space: nowrap; transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+    }
+    nav a:hover { background:rgba(168,190,221,0.14); color:#A8BEDD; transform: translateY(-1px); }
+    nav a:active { background:rgba(168,190,221,0.24); color:#A8BEDD; transform: scale(0.96); }
+    nav a:focus-visible { outline:2px solid #A8BEDD; outline-offset:2px; }
+    /* CTA-Shimmer (2026-09-14, analog iris-web .lw-badge) */
+    @keyframes ci-cta-shimmer { 0% { background-position: 0% 50%; } 100% { background-position: 250% 50%; } }
+    .nav-cta {
+      background: linear-gradient(90deg, #6B8FC7,#B8CBE8,#7C93B8,#B8CBE8,#6B8FC7,#B8CBE8,#7C93B8) !important;
+      background-size: 250% 100% !important;
+      animation: ci-cta-shimmer 4s linear infinite;
+      color: #16202C !important;
+      font-weight: 600 !important;
+      flex-shrink: 0 !important;
+      white-space: nowrap !important;
+      margin-left: 0.25rem;
+      box-shadow: -2px -2px 5px rgba(184,203,232,0.45), 4px 4px 10px rgba(0,0,0,0.7);
+    }
+    .nav-cta:hover { transform: scale(1.05); box-shadow: -3px -3px 6px rgba(184,203,232,0.55), 6px 6px 14px rgba(0,0,0,0.8); }
+    .nav-cta:active { transform: scale(0.96); box-shadow: 0 0 8px #A8BEDD; }
+    .nav-toggle {
+      display: none; align-items: center; justify-content: center;
+      width: 40px; height: 40px; border-radius: 8px; border: none;
+      background: transparent; cursor: pointer; flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.2s ease, transform 0.35s cubic-bezier(.68,-0.55,.27,1.55);
+    }
+    .nav-toggle:hover { background: rgba(168,190,221,0.14); }
+    .nav-toggle:active { transform: scale(0.88); }
+    .nav-toggle[aria-expanded="true"] { transform: rotate(90deg); }
+    .nav-toggle-bar { width: 22px; height: 2px; border-radius: 1px; background: var(--petrol); position: relative; transition: background 0.15s ease; }
+    .nav-toggle-bar::before, .nav-toggle-bar::after {
+      content: ''; position: absolute; left: 0; width: 22px; height: 2px; border-radius: 1px;
+      background: var(--petrol); transition: transform 0.35s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.2s ease;
+    }
+    .nav-toggle-bar::before { top: -7px; }
+    .nav-toggle-bar::after { top: 7px; }
+    .nav-toggle[aria-expanded="true"] .nav-toggle-bar { background: transparent; }
+    .nav-toggle[aria-expanded="true"] .nav-toggle-bar::before { transform: translateY(7px) rotate(45deg); }
+    .nav-toggle[aria-expanded="true"] .nav-toggle-bar::after { transform: translateY(-7px) rotate(-45deg); }
+
+    /* ── SECTIONS ── */
+    section { padding: 4rem 1.25rem; }
+    .container { max-width: var(--max-w); margin: 0 auto; }
+
+    .section-label {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--petrol); margin-bottom: 0.6rem;
+    }
+    /* Headlines in Mint #A8BEDD (v4.11 HEADLINE_LOCK) */
+    h2 { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 700; color: var(--petrol); margin-bottom: 1rem; line-height: 1.2; }
+    h3 { font-size: 1.1rem; font-weight: 600; color: var(--petrol); margin-bottom: 0.5rem; }
+    strong { color: var(--petrol); }
+    a { color: #E0E0E0; text-decoration: none; }
+    .lead { font-size: 1.05rem; color:var(--text); max-width: 600px; }
+
+    /* ── HERO ── */
+    #hero {
+      padding: 5rem 1.25rem 4rem;
+      text-align: center;
+    }
+    #hero .container { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+    #hero .badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background:var(--glass-bg); border: 1px solid var(--glass-bd);
+      color:var(--text); font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 0.3rem 0.85rem; border-radius: 20px;
+    }
+    #hero h1 {
+      font-size: clamp(2rem, 6vw, 3.8rem); font-weight: 800;
+      color: var(--petrol); line-height: 1.1; max-width: 700px;
+    }
+    #hero h1 em { font-style: normal; color: var(--petrol); }
+    #hero .sub {
+      font-size: 1.1rem; color:var(--text);
+      max-width: 560px; line-height: 1.55;
+    }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.7rem 1.4rem; border-radius: 10px; font-size: 0.95rem;
+      font-weight: 600; text-decoration: none; border: none; cursor: pointer;
+      transition: all 0.15s; font-family: inherit;
+    }
+    .btn-primary {
+      background: linear-gradient(90deg, #6B8FC7,#B8CBE8,#7C93B8,#B8CBE8,#6B8FC7,#B8CBE8,#7C93B8);
+      background-size: 250% 100%;
+      animation: ci-cta-shimmer 4s linear infinite;
+      color: #16202C;
+      box-shadow: -2px -2px 5px rgba(184,203,232,0.45), 4px 4px 10px rgba(0,0,0,0.7);
+    }
+    .btn-primary:hover { transform: perspective(400px) translateY(-3px) scale(1.03); box-shadow: -3px -3px 6px rgba(184,203,232,0.55), 6px 6px 14px rgba(0,0,0,0.8); }
+    .btn-primary:active { transform: scale(0.96); box-shadow: 0 0 8px #A8BEDD; }
+    .btn-ghost {
+      background:var(--glass-bg); color:var(--text);
+      border: 1px solid var(--glass-bd);
+    }
+    .btn-ghost:hover { background: rgba(224,224,224,0.25); box-shadow: 0 0 15px rgba(168,190,221,0.4); }
+    .btn-ghost:active { background: rgba(224,224,224,0.35); transform: scale(0.96); }
+    .btn-store {
+      background: var(--petrol); color: var(--white);
+      border-radius: 12px; padding: 0.65rem 1.2rem;
+      font-size: 0.85rem;
+    }
+    .btn-store:hover { background: #A8BEDD; }
+    .btn-store:active { background: #A8BEDD; transform: scale(0.96); }
+    .btn-store .store-sub { font-size: 0.65rem; font-weight: 400; opacity: 0.75; display: block; }
+    .btn-store .store-name { font-size: 1rem; font-weight: 700; display: block; line-height: 1.1; }
+
+    /* ── GRID-2COL ── */
+    .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+
+    /* ── DIVIDER ── */
+    .section-divider { height: 1px; background:var(--glass-bg); max-width: var(--max-w); margin: 0 auto; }
+
+    /* ── USP LIST ── */
+    .usp-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+    .usp-list li {
+      display: flex; align-items: flex-start; gap: 0.5rem;
+      font-size: 0.875rem; color:var(--text);
+    }
+    .usp-list li::before {
+      content: "✓"; color: var(--petrol); font-weight: 700;
+      flex-shrink: 0; margin-top: 0.05rem;
+    }
+
+    /* ── DIREKT-ABO — 50/50 Split ── */
+    .abo-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--glass-bd);
+    }
+    .abo-left {
+      background: rgba(19,27,39,0.55);
+      
+      padding: 2rem 2.25rem;
+      border-right: 1px solid var(--glass-bd);
+      display: flex; flex-direction: column; gap: 1.25rem;
+    }
+    .abo-right {
+      background:var(--glass-bg);
+      
+      padding: 2rem 2.25rem;
+      display: flex; flex-direction: column; gap: 1.25rem;
+    }
+    .abo-app-header {
+      display: flex; align-items: center; gap: 1rem; margin-bottom: 0.25rem;
+    }
+    .abo-app-icon {
+      width: 56px; height: 56px; border-radius: 14px;
+      background: linear-gradient(135deg, #E0E0E0, #5B7290);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; flex-shrink: 0;
+    }
+    .store-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+    /* ── WÜRDE ── */
+    .wuerde-schild {
+      display: flex; justify-content: center; margin-bottom: 1.5rem;
+    }
+    .schild-icon {
+      width: 72px; height: 72px;
+      background: linear-gradient(145deg, #A8BEDD 0%, #5B7290 100%);
+      border: 2.5px solid #E0E0E0;
+      border-radius: 50% 50% 45% 45% / 55% 55% 45% 45%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      box-shadow: 0 4px 16px rgba(224,224,224,0.25);
+    }
+    .wuerde-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .wuerde-card {
+      padding: 1.4rem;
+      background: rgba(19,27,39,0.35);
+      
+      border: 1.5px solid #5B7290;
+      border-radius: 14px;
+      display: flex; flex-direction: column; gap: 0.75rem;
+    }
+    .wuerde-icon { font-size: 1.8rem; }
+    .wuerde-card h3 { color: var(--petrol); font-size: 1rem; }
+    .wuerde-card p { font-size: 0.855rem; color:var(--text); line-height: 1.55; }
+    .wuerde-quote {
+      background: rgba(19,27,39,0.45); border:1px solid rgba(224,224,224,0.25);
+      border-left: 4px solid var(--petrol); border-radius: 0 12px 12px 0;
+      padding: 1rem 1.25rem; margin-bottom: 1.5rem;
+    }
+    .wuerde-quote p { font-size: 0.95rem; font-style: italic; color:var(--text); line-height: 1.6; }
+    .wuerde-quote cite { font-size: 0.72rem; font-weight: 700; color: var(--petrol); text-transform: uppercase; letter-spacing: 0.08em; font-style: normal; display: block; margin-top: 0.4rem; }
+
+    /* ── CHARTA GRID ── */
+    .charta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .charta-card {
+      background: linear-gradient(145deg, rgba(91,114,144,0.36) 0%, rgba(91,114,144,0.24) 55%, rgba(91,114,144,0.16) 100%);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border: 1.5px solid #5B7290;
+      border-radius: 14px;
+      padding: 1.25rem 1.4rem;
+      cursor: pointer;
+      transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease, border-color .3s ease;
+      transform-style: preserve-3d;
+    }
+    .charta-card:hover { transform: perspective(600px) rotateX(4deg) rotateY(-2deg) translateY(-4px) scale(1.02); box-shadow: 0 24px 48px rgba(168,190,221,0.32), 0 0 22px rgba(168,190,221,0.28); border-color: #A8BEDD; }
+    .charta-card:active { transform: perspective(800px) rotateX(2deg) scale(0.96); box-shadow: 0 8px 20px rgba(168,190,221,0.35); border-color: #A8BEDD; }
+    .charta-card.expanded { border-color:#E0E0E0; }
+    .charta-card .art-num { font-size: 1.25rem; font-weight: 800; color:#E0E0E0; margin-bottom: 0.35rem; line-height: 1; }
+    .charta-card h3 { font-size: 0.92rem; font-weight: 700; color:#E0E0E0; margin-bottom: 0.5rem; line-height: 1.3; }
+    .charta-card .art-short { font-size: 0.82rem; color:var(--text); line-height: 1.5; }
+    .charta-card .art-detail {
+      display: none; margin-top: 0.85rem;
+      font-size: 0.8rem; color:var(--text); line-height: 1.55;
+      border-top: 1px solid rgba(91,114,144,0.4); padding-top: 0.75rem;
+    }
+    .charta-card.expanded .art-detail { display: block; }
+    .charta-card .art-quote {
+      font-style: italic; color: var(--text);
+      font-size: 0.8rem; line-height: 1.5;
+      border-left: 2px solid #5B7290;
+      padding-left: 0.7rem; margin-top: 0.5rem;
+    }
+
+    /* ── PG-RECHNER ── */
+    .pg-btn {
+      background:var(--glass-bg);
+      color:#E0E0E0;
+      border: 1.5px solid #E0E0E0;
+      border-radius: 8px;
+      padding: 0.5rem 1.1rem;
+      font-size: 0.875rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+      font-family: inherit;
+    }
+    .pg-btn:hover { background:rgba(224,224,224,0.1); }
+    .pg-btn:active { background:rgba(224,224,224,0.22); transform: scale(0.96); }
+    .pg-btn.active { background: #E0E0E0; color: #fff; border-color:#E0E0E0; }
+    .pg-benefits-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .pg-card {
+      background: #5B7290;
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      min-height: 110px;
+    }
+
+    /* ── COMING SOON ── */
+    .coming-soon {
+      background: #5B7290;
+      border-top: 3px solid #A8BEDD;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .coming-soon-label {
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.12em; color: #FFFFFF;
+    }
+    .coming-soon-text {
+      font-size: 1rem; font-weight: 700; color: #FFFFFF; line-height: 1.35;
+    }
+    .coming-soon-sub {
+      font-size: 0.78rem; color: rgba(255,255,255,0.75);
+    }
+    .coming-soon-contact {
+      font-size: 0.75rem; color: rgba(255,255,255,0.65); margin-top: 0.25rem;
+    }
+    .coming-soon-contact a { color:#FFFFFF; text-decoration: underline; font-weight:600; }
+
+    /* ── ZBI TEASER ── */
+    .zbi-teaser {
+      background:var(--glass-bg); border: 1px solid var(--glass-bd);
+      border-radius: 12px; padding: 0.9rem 1.1rem;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 0.5rem; margin-bottom: 0.5rem;
+    }
+    .zbi-teaser-q { font-size: 0.82rem; color: var(--text); flex: 1; }
+    .zbi-teaser-scale {
+      display: flex; gap: 0.25rem; flex-shrink: 0;
+    }
+    .zbi-pip {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 1.5px solid var(--glass-bd);
+      background:var(--glass-bg);
+    }
+
+    /* ── DOWNLOAD ── */
+    #download { text-align: center; }
+    #download .container { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #17273F;
+      color: rgba(255,255,255,0.72);
+      text-align: center; padding: 2rem 1.25rem;
+      font-size: 0.8rem;
+      border-top: 1px solid rgba(168,190,221,0.2);
+    }
+    footer a { color: #A8BEDD; text-decoration: underline; }
+    footer a:hover { color: #E6ACBE; }
+    footer a:focus-visible { outline:2px solid #A8BEDD; outline-offset:2px; }
+    .footer-impressum { margin-top:1rem; padding-top:1rem; border-top:1px solid rgba(168,190,221,0.2); font-size:0.72rem; opacity:0.85; line-height:1.7; }
+    /* IRIS-Logo-Hover (René-Direktive 2026-08-20) — NICHT das Pulse-Heart-Logo, nur das IRIS-Digital-Signet im Footer */
+    .iris-logo { transition: transform .35s cubic-bezier(.22,1,.36,1), filter .35s ease; cursor: default; filter: drop-shadow(0 0 3px rgba(168,190,221,0.5)); }
+    .iris-logo:hover { transform: scale(1.14) rotate(10deg); filter: drop-shadow(0 0 9px rgba(168,190,221,0.9)) drop-shadow(0 0 3px rgba(230,172,190,0.6)); }
+    .iris-wordmark { font-family: 'Michroma', sans-serif; font-weight: 400; letter-spacing: 0.04em; }
+    .footer-claim { font-size:0.9rem; font-weight:700; color:#A8BEDD; margin-bottom:0.4rem; letter-spacing:0.01em; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1199px) {
+      .nav-toggle { display: inline-flex; order: 2; }
+      nav {
+        order: 3; flex-basis: 100%;
+        max-height: 0; overflow: hidden; gap: 0; margin: 0;
+        flex-direction: column; align-items: stretch;
+        transition: max-height 0.25s ease;
+      }
+      nav.nav-open { max-height: 600px; margin-top: 0.5rem; }
+      nav a { width: 100%; border-radius: 8px; padding: 0.7rem 0.9rem; }
+      nav a.nav-cta { margin-left: 0; margin-top: 0.3rem; text-align: center; justify-content: center; }
+      .ci-toggle { order: 4; flex-basis: 100%; justify-content: center; margin-left: 0 !important; margin-top: 0.5rem; }
+    }
+    @media (max-width: 768px) {
+      .grid-2col        { grid-template-columns: 1fr; }
+      .abo-split        { grid-template-columns: 1fr; }
+      .abo-left         { border-right: none; border-bottom: 1px solid var(--glass-bd); }
+      .pg-benefits-grid { grid-template-columns: 1fr; }
+      .btn, .pg-btn, nav a.nav-cta, #back-to-top { min-height: 44px; min-width: 44px; }
+    }
+    /* ── BACK TO TOP ── */
+    #back-to-top {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #E0E0E0;
+      color: #fff;
+      border: none;
+      font-size: 1.15rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+      z-index: 999;
+      box-shadow: 0 2px 12px rgba(224,224,224,0.35);
+    }
+    #back-to-top.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    #back-to-top:hover { background: #E0E0E0; }
+    #back-to-top:active { background: #E0E0E0; transform: scale(0.92); }
+
+    /* ── FLYER LIGHTBOX ── */
+    #flyer-modal { display:none; position:fixed; inset:0; z-index:9000; background:rgba(10,30,35,0.88); align-items:center; justify-content:center; padding:1rem; }
+    #flyer-modal.open { display:flex; }
+    #flyer-modal img { max-width:min(1200px,95vw); max-height:92vh; border-radius:10px; box-shadow:0 16px 64px rgba(0,0,0,0.5); object-fit:contain; }
+    #flyer-modal-close { position:fixed; top:1.25rem; right:1.25rem; width:44px; height:44px; border-radius:50%; background:#E0E0E0; color:#fff; font-size:1.4rem; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:9001; line-height:1; }
+    #flyer-modal-close:hover { background:#E0E0E0; }
+    #flyer-modal-close:active { background:#E0E0E0; transform: scale(0.92); }
+    #flyer-modal-close:focus-visible { outline:3px solid #A8BEDD; outline-offset:2px; }
+
+    /* ── FLYER CARD (compact) ── */
+    .flyer-card-img {
+      width:35%;
+      min-width:200px;
+      max-width:100%;
+      height:auto;
+      border-radius:14px;
+      border:2px solid #5B7290;
+      box-shadow:0 6px 24px rgba(224,224,224,0.30);
+      display:block;
+      margin:0 auto 1rem;
+      cursor:zoom-in;
+      image-rendering:-webkit-optimize-contrast;
+      image-rendering:crisp-edges;
+      transition:box-shadow 0.22s ease, transform 0.18s ease;
+    }
+    .flyer-card-img:hover {
+      box-shadow:0 12px 40px rgba(224,224,224,0.52), 0 0 0 3px #5B7290;
+      transform:translateY(-2px) scale(1.012);
+    }
+
+    /* ── FAQ ACCORDION ── */
+    details.faq-item { border:1px solid rgba(224,224,224,0.25); border-radius:10px; margin-bottom:0.75rem; overflow:hidden; background:var(--glass-bg); }
+    details.faq-item[open] { border-color:var(--petrol); }
+    details.faq-item summary { padding:1rem 1.25rem; cursor:pointer; font-weight:600; color:var(--text); list-style:none; display:flex; justify-content:space-between; align-items:center; gap:1rem; }
+    details.faq-item summary::after { content:'＋'; font-size:1.1rem; color:var(--petrol); flex-shrink:0; transition:transform 0.25s; }
+    details.faq-item[open] summary::after { transform:rotate(45deg); }
+    details.faq-item summary::-webkit-details-marker { display:none; }
+    .faq-answer { padding:0 1.25rem 1rem; color:var(--text); line-height:1.6; font-size:0.92rem; }
+    .faq-leitmotiv { text-align:center; padding:1.5rem; background:#E0E0E0; color:#fff; border-radius:12px; margin-top:1.25rem; }
+    .faq-leitmotiv strong { display:block; font-size:1.15rem; font-weight:800; margin-bottom:0.3rem; color:#fff; }
+
+    /* ── KONTAKT ── */
+    .checklist-prep { background:rgba(91,114,144,0.18); border:1px solid rgba(224,224,224,0.25); border-left:4px solid #5B7290; border-radius:10px; padding:1.25rem 1.5rem; margin-bottom:1.75rem; }
+    .checklist-title { font-weight:700; color:var(--text); margin-bottom:0.6rem; font-size:0.95rem; }
+    .checklist-items { margin:0; padding-left:1.4rem; color:var(--text); font-size:0.88rem; line-height:1.9; }
+    .contact-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1rem; }
+    .contact-card { background:var(--glass-bg); border:1px solid rgba(224,224,224,0.25); border-radius:12px; padding:1.1rem 1.25rem; display:flex; flex-direction:column; gap:0.3rem; }
+    .contact-card--primary { border-color:#5B7290; border-width:2px; background:rgba(91,114,144,0.22); }
+    .contact-card--alt { border-color:rgba(224,224,224,0.25); }
+    .contact-icon { font-size:1.4rem; }
+    .contact-label { font-size:0.72rem; font-weight:700; color:var(--text); text-transform:uppercase; letter-spacing:0.04em; }
+    .contact-number { font-size:1.05rem; font-weight:700; color:var(--petrol); text-decoration:none; }
+    .contact-number:hover { color:var(--text); text-decoration:underline; }
+    .contact-number--muted { color:var(--text); font-size:0.88rem; font-weight:600; }
+    .contact-desc { font-size:0.78rem; color:var(--text); line-height:1.5; margin-top:0.1rem; }
+    .sub-section-label { font-size:0.72rem; font-weight:700; color:var(--petrol); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.6rem; }
+    /* ── Wohnen & Versorgung (v50) ────────────────────────────────────────── */
+    .wohn-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5rem; margin-top:2rem; }
+    .wohn-card { position:relative; overflow:hidden; background: rgba(19,27,39,0.55); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border:1px solid rgba(124,147,184,0.16); border-radius:16px; padding:1.5rem; transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease, border-color .3s ease; transform-style: preserve-3d; box-shadow: -6px -6px 10px rgba(124,147,184,0.22), 22px 22px 40px rgba(0,0,0,0.65); }
+    .wohn-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); z-index:1; }
+    .wohn-card:hover { transform: perspective(600px) rotateX(4deg) rotateY(-2deg) translateY(-4px) scale(1.02); box-shadow: 0 24px 48px rgba(168,190,221,0.32), 0 0 22px rgba(168,190,221,0.28); border-color: #A8BEDD; }
+    .wohn-card:active { transform: perspective(800px) rotateX(2deg) scale(0.96); box-shadow: 0 8px 20px rgba(168,190,221,0.35); border-color: #A8BEDD; }
+    @keyframes iconPop { 0%,100% { transform: scale(1) rotate(0deg); } 35% { transform: scale(1.28) rotate(-10deg); } 65% { transform: scale(1.1) rotate(7deg); } }
+    @keyframes iconFloat { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-5px) rotate(3deg); } }
+    .wohn-icon, .abo-app-icon, .wuerde-icon, .contact-icon, .card-emoji {
+      display: inline-block; transition: transform .25s ease;
+      animation: iconFloat 2.6s ease-in-out infinite;
+    }
+    .wohn-card:hover .wohn-icon, .wohn-icon:hover, .abo-app-icon:hover, .wuerde-icon:hover, .contact-icon:hover,
+    .card-emoji:hover, .glass:hover .card-emoji, .charta-card:hover .card-emoji { animation: iconPop .55s ease; }
+    .wohn-icon { font-size:1.8rem; margin-bottom:0.75rem; line-height:1; }
+    .wohn-card h3 { font-size:0.95rem; font-weight:700; color:#E0E0E0; margin:0 0 0.6rem; line-height:1.3; }
+    .wohn-para { font-size:0.85rem; color:#E0E0E0; line-height:1.55; margin:0 0 0.6rem; }
+    .wohn-para strong { color:#E0E0E0; }
+    .wohn-badge { display:inline-block; background:#E0E0E0; color:#fff; font-size:0.7rem; font-weight:700; padding:0.18rem 0.55rem; border-radius:12px; margin:0.15rem 0.1rem 0 0; letter-spacing:0.01em; }
+    .wohn-badge--mid { background:#5B7290; color:#FFFFFF; }
+    @media(max-width:640px){ .wohn-grid { grid-template-columns:1fr; } }
+
+    /* ── Einwandbehandlung: "Wussten Sie schon?" (v52) ─────────────────── */
+    .insight-box { background:var(--mint); border:1px solid var(--mid); border-radius:10px; padding:1.1rem 1.35rem; margin:1.5rem 0; }
+    .insight-box .insight-label { font-size:0.68rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:var(--petrol); margin-bottom:0.5rem; }
+    .insight-box .insight-mythos { font-size:0.82rem; color:var(--text); margin-bottom:0.4rem; }
+    .insight-box .insight-mythos strong { color:var(--petrol); }
+    .insight-box .insight-realitaet { font-size:0.85rem; color:var(--petrol-dk); font-weight:600; line-height:1.55; }
+
+    /* ── Affiliate Native-Ad-Slots (v52) — Mint-Teal-Gradient-Rahmen ────── */
+    .native-ad { border-radius:12px; padding:1rem 1.25rem; margin-top:1.25rem; text-align:center;
+      background-image:linear-gradient(var(--glass-bg),var(--glass-bg)), linear-gradient(135deg,var(--mint) 0%,var(--mid) 100%);
+      background-origin:border-box; background-clip:padding-box, border-box; border:2px solid transparent; }
+    .native-ad-label { font-size:0.62rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--petrol); opacity:0.85; margin-bottom:0.35rem; }
+    .native-ad-placeholder { font-size:0.78rem; color:var(--text); opacity:0.75; }
+    /* Horizontal-Banner-Hardlock (v3.1) — IAB Leaderboard 728x90-Referenzrahmen */
+    .ad-container { max-width:728px; height:auto; margin-left:auto; margin-right:auto; }
+    @media (max-width:768px) { .ad-container { max-width:100%; } }
+
+    /* ── Affiliate Sidebar (v4.1) — Sticky reaktiviert, Glass-Look beibehalten ── */
+    .content-with-sidebar { display:block; }
+    .resource-sidebar {
+      display:none; flex-direction:column; gap:1rem; z-index:50;
+      background:rgba(19,27,39,0.40);
+      backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+      border:1px solid rgba(124,147,184,0.16);
+      box-shadow:-6px -6px 10px rgba(124,147,184,0.22), 22px 22px 40px rgba(0,0,0,0.65);
+      border-radius:16px;
+      padding:1rem;
+    }
+    @media (min-width:1200px) {
+      .content-with-sidebar { display:grid; grid-template-columns:1fr 340px; align-items:start; column-gap:24px; }
+      .content-with-sidebar > *:not(.resource-sidebar) { grid-column:1; }
+      .resource-sidebar { display:flex; position:sticky; top:1rem; max-height:calc(100vh - 2rem); overflow-y:auto; grid-column:2; grid-row:1 / -1; justify-self:end; }
+    }
+    .resource-sidebar-label { font-size:0.68rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:#E0E0E0; background:rgba(168,190,221,0.18); padding:0.4rem 0.6rem; border-radius:6px; text-align:center; line-height:1.4; }
+    .resource-sidebar-label a { text-transform:none; letter-spacing:0; font-size:0.6rem; font-weight:600; color:#E0E0E0; }
+    .portrait-ad-slot { border-radius:8px; box-shadow:0 4px 16px rgba(224,224,224,0.25); background:var(--glass-bg); border:1px solid var(--glass-bd); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    .ad-half-page { width:300px; height:600px; }
+    .ad-wide-skyscraper { width:160px; height:600px; display:none; }
+    @media (min-height:1300px) { .ad-wide-skyscraper { display:flex; } }
+    /* Sichtbares Maß-Label (v3.3) — Petrol auf Mint, in jedem Platzhalter-Slot */
+    .ad-size-label { display:inline-block; font-size:0.62rem; font-weight:800; letter-spacing:0.04em; color:#E0E0E0; background:rgba(168,190,221,0.18); padding:0.2rem 0.55rem; border-radius:5px; margin-bottom:0.4rem; }
+
+    /* ── v67.146 High-End Effects (Dark-Mode-Takeover) ── */
+    @keyframes ci-electric { 0%,100% { box-shadow:0 0 4px 1px rgba(168,190,221,0.5); border-color:rgba(168,190,221,0.9); } 50% { box-shadow:0 0 16px 5px rgba(168,190,221,0.9); border-color:#E6ACBE; } }
+    #zbi-result.ci-electric { border:2px solid #A8BEDD !important; animation:ci-electric 1.4s ease-in-out infinite; }
+    .ci-gauge-wrap { display:flex; align-items:center; gap:1rem; }
+    .ci-toggle { display:inline-flex; align-items:center; gap:0.55rem; cursor:pointer; user-select:none; }
+    .ci-toggle .track { width:46px; height:24px; border-radius:999px; position:relative; background:linear-gradient(180deg,#17273F,#131B27); border:1px solid rgba(0,0,0,0.6); box-shadow:inset 0 2px 4px rgba(0,0,0,0.6), inset 0 -1px 0 rgba(255,255,255,0.04); transition:box-shadow .25s ease; }
+    .ci-toggle .knob { position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%; background:linear-gradient(180deg,#5B7290,#253144); box-shadow:0 2px 3px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15); transition:left .25s cubic-bezier(.22,1,.36,1); }
+    .ci-toggle .led { position:absolute; top:50%; right:4px; transform:translateY(-50%); width:6px; height:6px; border-radius:50%; background:#D32F2F; box-shadow:0 0 4px #D32F2F; }
+    .ci-toggle.on .track { box-shadow:inset 0 2px 4px rgba(0,0,0,0.6), 0 0 10px rgba(168,190,221,0.5); }
+    .ci-toggle.on .knob { left:24px; }
+    .ci-toggle.on .led { left:6px; right:auto; background:#A8BEDD; box-shadow:0 0 5px #A8BEDD; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ HEADER ═══ -->
+<header class="site-header">
+  <svg class="header-waves" viewBox="0 0 800 120" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;inset:0;z-index:-1;width:100%;height:100%;">
+    <defs><linearGradient id="wave-gradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#A8BEDD"/><stop offset="100%" stop-color="#5B7290"/></linearGradient></defs>
+    <path class="wave wave-1" d="M0,55 C150,15 350,95 550,50 C650,25 750,60 800,45 L800,120 L0,120 Z" fill="url(#wave-gradient)" opacity="0.1"/>
+    <path class="wave wave-2" d="M0,70 C200,105 400,25 600,75 C700,100 750,60 800,80 L800,120 L0,120 Z" fill="url(#wave-gradient)" opacity="0.2"/>
+    <path class="wave wave-3" d="M0,45 C220,85 380,5 580,55 C680,80 760,50 800,60 L800,120 L0,120 Z" fill="url(#wave-gradient)" opacity="0.3"/>
+  </svg>
+  <div class="header-inner">
+    <a href="#" class="logo" aria-label="CareInsight — Pulse Heart">
+      <svg class="logo-mark" width="34" height="30" viewBox="0 0 34 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g class="logo-heart" stroke="#FFFFFF" stroke-linecap="round" fill="none">
+          <path d="M17 27 C7 19.5 2 13.5 2 8.5" stroke-width="4.5"/>
+          <path d="M2 8.5 C2 4 5.5 1.5 9.5 2.7 C13 3.7 16 6.8 17 10" stroke-width="2.2"/>
+          <path d="M17 10 C18 6.8 21 3.7 24.5 2.7" stroke-width="2.2"/>
+          <path d="M24.5 2.7 C28.5 1.5 32 4 32 8.5 C32 13.5 27 19.5 17 27" stroke-width="4.5"/>
+        </g>
+      </svg>
+      <div class="logo-textblock">
+        <div class="logo-text">Care<span>Insight</span></div>
+        <div class="logo-tag">die Seite die Hilft</div>
+      </div>
+    </a>
+    <button class="nav-toggle" id="nav-toggle" type="button" aria-label="Menü öffnen" aria-expanded="false" aria-controls="site-nav">
+      <span class="nav-toggle-bar"></span>
+    </button>
+    <nav id="site-nav">
+      <a href="#hero">Startseite</a>
+      <a href="#ressourcen">Ressourcen</a>
+      <a href="#sicherheit">ZBI</a>
+      <a href="#pg-rechner">Leistungen</a>
+      <a href="#dnqp">DNQP</a>
+      <a href="#abo">Preise</a>
+      <a href="#recht-vorsorge">Recht &amp; Vorsorge</a>
+      <a href="#wuerde">Würde</a>
+      <a href="#ethik">Charta</a>
+      <a href="#faq">FAQ</a>
+      <a href="#tagesresidenz">Residenz</a>
+      <a href="#wohnen">Wohnen</a>
+      <a href="#kontakt">Kontakt</a>
+      <a href="#download" class="btn nav-cta">Jetzt starten</a>
+    </nav>
+    <div class="ci-toggle" id="master-live-toggle" style="display:none;margin-left:0.5rem;" role="button" tabindex="0">
+      <div class="track"><div class="knob"></div><div class="led"></div></div>
+      <span id="master-live-lbl" style="font-size:0.72rem;font-weight:700;color:var(--petrol);"></span>
+    </div>
+  </div>
+</header>
+
+<!-- Grid-Wrapper (v3.3) — trägt die sticky Resource-Sidebar neben dem Fachinhalt, ohne einzelne Sektionen anzufassen -->
+<div class="content-with-sidebar">
+
+<!-- ═══════════════════════════════════════ 1 · HERO ═══ -->
+<section id="hero">
+  <div class="container">
+    <h1>Der Blick<br/><em>hinter die Pflege.</em></h1>
+    <p class="sub">Sie pflegen. Sie begleiten. Sie kämpfen täglich für die Würde eines anderen Menschen. Hier finden Sie das Wissen, das Ihnen niemand erklärt hat — klar, ehrlich und auf Ihrer Seite.</p>
+    <div class="hero-actions">
+      <a href="#abo" class="btn btn-primary">Adea — Lösung entdecken →</a>
+      <a href="#ressourcen" class="btn btn-ghost">Pflegewissen entdecken</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PFLEGEVERSTÄNDNIS ═══ -->
+<section id="pflegeverstaendnis">
+  <div class="container">
+    <div style="font-size:2rem;margin-bottom:0.75rem;">🤲</div>
+    <h2>Aktivierende Pflege – Hilfe zur Selbsthilfe</h2>
+    <p class="lead" style="margin-bottom:1.25rem;">Professionelle Pflege bedeutet nicht, Aufgaben einfach nur abzunehmen. Das Ziel ist es, Ihre Selbstständigkeit und Unabhängigkeit so lange wie möglich zu bewahren oder wiederherzustellen.</p>
+    <ul class="usp-list" style="margin-bottom:1.5rem;">
+      <li>Ressourcen im Fokus</li>
+      <li>Anleitung statt Übernahme</li>
+      <li>Lebensqualität steigern</li>
+    </ul>
+    <div style="background:var(--glass-bg);border-left:3px solid #E0E0E0;padding:0.85rem 1.1rem;border-radius:0 8px 8px 0;">
+      <p style="font-size:0.85rem;color:var(--text);margin:0;">Gesetzliche Verankerung: <strong>§ 11 SGB XI</strong> — Aktivierende Pflege ist gesetzlich verankerter Grundsatz der Pflegeversicherung.</p>
+    </div>
+
+    <!-- Affiliate Native-Ad-Slot — Platzhalter, kein Drittanbieter-Script aktiv · 728x90 max -->
+    <div class="native-ad ad-container" role="complementary" aria-label="Anzeige: Empfohlene Partner (Platzhalter, max. 728x90 px)">
+      <div class="ad-size-label">Max. 728x90 px</div>
+      <div class="native-ad-label">Anzeige · Empfohlene Partner</div>
+      <div class="native-ad-placeholder">Platzhalter — Affiliate-Partner folgt</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ EYECATCHER-BAND — Leitmotiv ═══ -->
+<div style="background:#5B7290;padding:2rem 1.5rem;text-align:center;">
+  <div style="max-width:var(--max-w);margin:0 auto;">
+    <p style="font-size:clamp(1.25rem,3vw,1.75rem);font-weight:800;color:#FFFFFF;line-height:1.3;margin:0;letter-spacing:-0.01em;">
+      „Hilfe in Anspruch zu nehmen ist keine Schwäche —<br/>es ist die klügste Form der Fürsorge."
+    </p>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════════════ 2 · RESSOURCEN — Aktivierende Pflege ═══ -->
+<section id="ressourcen">
+  <div class="container">
+    <p class="section-label">§ 11 SGB XI · Aktivierende Pflege</p>
+    <h2>Nicht für jemanden handeln — sondern mit ihm.</h2>
+    <p class="lead" style="margin-bottom:1.25rem;">Gute Pflege beginnt mit einer Frage: Was kann dieser Mensch noch selbst? Alles, was er noch kann, gehört ihm. Ihre Aufgabe ist es, diese Fähigkeiten zu schützen — nicht zu ersetzen.</p>
+
+    <!-- Psychologischer Anker: Hilfe holen ist keine Schwäche -->
+    <div style="background:var(--glass-bg);border-left:3px solid #E0E0E0;padding:0.85rem 1.1rem;border-radius:0 8px 8px 0;margin-bottom:1.75rem;">
+      <p style="font-size:0.92rem;font-weight:700;color:#E0E0E0;margin-bottom:0.2rem;">Hilfe holen ist keine Schwäche.</p>
+      <p style="font-size:0.82rem;color:var(--text);margin:0;">Aktivierende Pflege bedeutet: Sie unterstützen — ohne zu übernehmen. Das braucht Wissen, Haltung und manchmal professionelle Begleitung. Beides ist Stärke.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:1.5rem;">
+      <div class="glass" style="padding:1.5rem;">
+        <div class="card-emoji" style="font-size:1.6rem;margin-bottom:0.6rem;">🚶</div>
+        <h3>Bewegung schützt Würde</h3>
+        <p style="font-size:0.875rem;color:var(--text);">Wer sich bewegen kann, behält ein Stück Freiheit. Tägliche Bewegungseinheiten — auch kleine — erhalten Fähigkeiten, die einmal verloren schwer zurückkommen.</p>
+      </div>
+      <div class="glass" style="padding:1.5rem;">
+        <div class="card-emoji" style="font-size:1.6rem;margin-bottom:0.6rem;">🧠</div>
+        <h3>Erinnerung als Anker</h3>
+        <p style="font-size:0.875rem;color:var(--text);">Lebensgeschichte, Lieblingsmusik, vertraute Bilder: Das Gehirn liebt das Bekannte. Biographische Begleitung ist keine Beschäftigung — sie ist Identitätspflege.</p>
+      </div>
+      <div class="glass" style="padding:1.5rem;">
+        <div class="card-emoji" style="font-size:1.6rem;margin-bottom:0.6rem;">🤝</div>
+        <h3>Selbstbestimmung ist ein Recht</h3>
+        <p style="font-size:0.875rem;color:var(--text);">§ 11 SGB XI ist eindeutig: Pflege darf Selbstständigkeit nicht ersetzen — sie muss sie erhalten. Wer alles übernimmt, nimmt dem Menschen etwas Wichtiges weg.</p>
+      </div>
+      <div class="glass" style="padding:1.5rem;">
+        <div class="card-emoji" style="font-size:1.6rem;margin-bottom:0.6rem;">🏡</div>
+        <h3>Der Alltag als Therapie</h3>
+        <p style="font-size:0.875rem;color:var(--text);">Tisch decken, Gemüse schneiden, den Briefkasten leeren: Was nach Kleinigkeit klingt, ist für den pflegebedürftigen Menschen Teilhabe am Leben. Das ist Pflege auf höchstem Niveau.</p>
+      </div>
+    </div>
+
+    <div class="glass" style="padding:1.25rem 1.5rem;border-left:3px solid var(--petrol);margin-bottom:1.5rem;">
+      <p style="font-size:0.875rem;color:var(--text);font-style:italic;">„Nicht für jemanden. Sondern mit ihm." — Das ist der Kern aktivierender Pflege. Und Ihr stärkstes Werkzeug als pflegende Person.</p>
+    </div>
+
+    <!-- 3 Säulen individueller Pflegekonzepte -->
+    <div style="margin-bottom:1.5rem;">
+      <p style="font-size:0.72rem;font-weight:700;color:var(--petrol);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem;">Die 3 Säulen individueller Pflegekonzepte</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;">
+        <div style="background:rgba(91,114,144,0.2);border:1px solid rgba(224,224,224,0.25);border-top:3px solid #5B7290;border-radius:10px;padding:1rem 1.1rem;">
+          <div class="card-emoji" style="font-size:1.3rem;margin-bottom:0.4rem;">🧭</div>
+          <div style="font-size:0.82rem;font-weight:700;color:var(--text);margin-bottom:0.3rem;">Autonomie</div>
+          <div style="font-size:0.76rem;color:var(--text);line-height:1.5;">Individuelle Pflegekonzepte erhalten die Fähigkeit, eigene Entscheidungen zu treffen — über den Tagesablauf, Mahlzeiten, Aktivitäten. Selbstbestimmung ist kein Luxus, sondern gesetzlich verankert (§ 11 SGB XI).</div>
+        </div>
+        <div style="background:rgba(91,114,144,0.2);border:1px solid rgba(224,224,224,0.25);border-top:3px solid #5B7290;border-radius:10px;padding:1rem 1.1rem;">
+          <div class="card-emoji" style="font-size:1.3rem;margin-bottom:0.4rem;">🛡️</div>
+          <div style="font-size:0.82rem;font-weight:700;color:var(--text);margin-bottom:0.3rem;">Sicherheit</div>
+          <div style="font-size:0.76rem;color:var(--text);line-height:1.5;">Strukturierte Umgebungen und verlässliche Routinen reduzieren Stürze, Orientierungslosigkeit und Angst. Ein angepasstes Wohnumfeld (§ 40 SGB XI) ist der erste Schutzwall.</div>
+        </div>
+        <div style="background:rgba(91,114,144,0.2);border:1px solid rgba(224,224,224,0.25);border-top:3px solid #5B7290;border-radius:10px;padding:1rem 1.1rem;">
+          <div class="card-emoji" style="font-size:1.3rem;margin-bottom:0.4rem;">💚</div>
+          <div style="font-size:0.82rem;font-weight:700;color:var(--text);margin-bottom:0.3rem;">Entlastung</div>
+          <div style="font-size:0.76rem;color:var(--text);line-height:1.5;">Pflegende Angehörige brauchen selbst Unterstützung. Entlastungsangebote (131 € monatlich, §45b SGB XI), Kurzzeitpflege und Selbsthilfegruppen schützen vor Erschöpfung — und damit die Pflegequalität.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-box" role="note" aria-label="Wussten Sie schon: Kontrollverlust und Selbsthilfe">
+      <p class="insight-label">💡 Wussten Sie schon?</p>
+      <p class="insight-mythos"><strong>Mythos:</strong> „Wenn ich Hilfe annehme, verliere ich die Kontrolle über die Pflege meines Angehörigen."</p>
+      <p class="insight-realitaet"><strong>Realität:</strong> „Hilfe zur Selbsthilfe" ist kein Kontrollverlust, sondern ihr Garant: § 11 SGB XI verpflichtet dazu, vorhandene Fähigkeiten zu erhalten statt sie zu ersetzen — Sie behalten die Entscheidung, professionelle Unterstützung erweitert nur Ihre Möglichkeiten.</p>
+    </div>
+
+    <!-- ZBI-22 Verweis → Sicherheit-Sektion -->
+    <div class="glass" style="padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;border-left:3px solid var(--petrol);">
+      <div>
+        <p style="font-weight:600;color:var(--text);">Wie belastet sind Sie wirklich?</p>
+        <p style="font-size:0.825rem;color:var(--text);">Der ZBI-22 Belastungstest (22 Fragen, klinisch validiert) wartet weiter unten auf Sie.</p>
+      </div>
+      <a href="#sicherheit" class="btn btn-primary">ZBI-22 jetzt starten →</a>
+    </div>
+
+    <!-- Affiliate Native-Ad-Slot — Platzhalter, kein Drittanbieter-Script aktiv · 728x90 max -->
+    <div class="native-ad ad-container" role="complementary" aria-label="Anzeige: Empfohlene Partner (Platzhalter, max. 728x90 px)">
+      <div class="ad-size-label">Max. 728x90 px</div>
+      <div class="native-ad-label">Anzeige · Empfohlene Partner</div>
+      <div class="native-ad-placeholder">Platzhalter — Affiliate-Partner folgt</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════════════ 3 · SICHERHEIT / DNQP ═══ -->
+<section id="sicherheit">
+  <div class="container">
+    <p class="section-label">ZBI-22 · Belastungscheck</p>
+    <h2>Wie stark sind Sie belastet?</h2>
+    <p class="lead" style="margin-bottom:1.5rem;">Pflegende Angehörige tragen das Unsichtbare. Der ZBI-22 macht Ihre Belastung sichtbar — klinisch validiert, 22 Fragen, Score 0–88.</p>
+
+    <!-- ZBI Intro-Karte (immer sichtbar) -->
+    <div class="glass" style="padding:1.5rem 1.75rem;margin-bottom:1rem;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1rem;">
+        <div>
+          <h3 style="margin-bottom:0.25rem;">Zarit Burden Interview (ZBI-22)</h3>
+          <p style="font-size:0.855rem;color:var(--text);margin:0;">22 Fragen · klinisch validiert · Score 0–88 · ca. 5 Minuten</p>
+        </div>
+        <span style="font-size:0.72rem;font-weight:700;background:var(--glass-bg);color:var(--petrol);padding:0.25rem 0.6rem;border-radius:6px;text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0;align-self:flex-start;">Klinisch validiert</span>
+      </div>
+      <p style="font-size:0.845rem;color:var(--text);margin-bottom:1rem;">Skala 0–4 (Niemals → Fast immer) · 0–20 gering · 21–40 moderat · 41–88 hohe Belastung. Der Test ist anonym — keine Daten werden gespeichert.</p>
+      <button onclick="toggleZBI()" id="zbi-toggle-btn" class="btn btn-primary">Test starten →</button>
+    </div>
+
+    <!-- ZBI Collapsible (bei Bedarf — alle 22 Fragen + Scoring) -->
+    <div id="zbi-collapsible" style="display:none;margin-bottom:2rem;">
+      <div class="glass" style="padding:1.75rem;">
+        <!-- ZBI Progress -->
+        <div style="font-size:0.8rem;color:var(--petrol);font-weight:600;margin-bottom:0.4rem;" id="zbi-progress-label">0 von 22 beantwortet</div>
+        <div style="height:6px;background:var(--glass-bg);border-radius:3px;margin-bottom:1.5rem;overflow:hidden;">
+          <div id="zbi-fill" style="height:100%;background:var(--petrol);border-radius:3px;transition:width 0.3s;width:0%;"></div>
+        </div>
+
+        <div id="zbi-questions" style="display:flex;flex-direction:column;gap:1rem;"></div>
+
+        <div style="margin-top:1.5rem;display:flex;gap:0.75rem;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="calcZBI()" id="zbi-submit" disabled>Auswertung anzeigen</button>
+          <button class="btn btn-ghost" onclick="resetZBI()">Zurücksetzen</button>
+          <button class="btn btn-ghost" onclick="toggleZBI()" style="margin-left:auto;">Test ausblenden ↑</button>
+        </div>
+
+        <div id="zbi-result" style="margin-top:1.5rem;padding:1.5rem;border-radius:14px;display:none;">
+          <div class="ci-gauge-wrap">
+            <svg id="zbi-gauge" width="84" height="84" viewBox="0 0 84 84">
+              <circle cx="42" cy="42" r="34" stroke="rgba(168,190,221,0.15)" stroke-width="8" fill="none"/>
+              <circle id="zbi-gauge-fill" cx="42" cy="42" r="34" stroke="#E6ACBE" stroke-width="8" fill="none" stroke-linecap="round" transform="rotate(-90 42 42)"/>
+            </svg>
+            <div>
+              <div id="zbi-score" style="font-size:2rem;font-weight:800;margin-bottom:0.25rem;"></div>
+              <div id="zbi-level" style="font-size:1rem;font-weight:700;margin-bottom:0.5rem;"></div>
+            </div>
+          </div>
+          <p id="zbi-rec" style="font-size:0.875rem;line-height:1.55;"></p>
+          <p style="margin-top:1rem;font-size:0.8rem;color:var(--text);">Verlaufstracking und individuelle Therapie-Empfehlungen in <strong>Adea</strong>.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Affiliate Native-Ad-Slot — Platzhalter, kein Drittanbieter-Script aktiv · 728x90 max -->
+    <div class="native-ad ad-container" role="complementary" aria-label="Anzeige: Empfohlene Partner (Platzhalter, max. 728x90 px)">
+      <div class="ad-size-label">Max. 728x90 px</div>
+      <div class="native-ad-label">Anzeige · Empfohlene Partner</div>
+      <div class="native-ad-placeholder">Platzhalter — Affiliate-Partner folgt</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══ FINANZIELLES FUNDAMENT — PG-Rechner (Narrative: ZBI → PG → DNQP) ═══ -->
+<section id="pg-rechner">
+  <div class="container">
+    <div class="glass" style="padding:1.75rem;">
+      <p class="section-label" style="margin-bottom:0.75rem;">SGB XI · PG-Rechner</p>
+      <h2>Das Fundament Ihrer Autonomie.</h2>
+      <p class="lead" style="margin-bottom:0.5rem;">Wer seine Leistungsansprüche kennt, kann selbstbestimmt entscheiden — nicht bitten.</p>
+      <p style="font-size:0.82rem;color:var(--text);margin-bottom:1.5rem;">Wählen Sie Ihren Pflegegrad — alle Leistungen erscheinen sofort. Stand: 01.07.2025.</p>
+
+      <!-- ROUTES.profile — PG-Auswahl -->
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;" role="group" aria-label="Pflegegrad auswählen">
+        <button onclick="selectPG(1)" id="pg-btn-1" class="pg-btn">PG 1</button>
+        <button onclick="selectPG(2)" id="pg-btn-2" class="pg-btn">PG 2</button>
+        <button onclick="selectPG(3)" id="pg-btn-3" class="pg-btn">PG 3</button>
+        <button onclick="selectPG(4)" id="pg-btn-4" class="pg-btn">PG 4</button>
+        <button onclick="selectPG(5)" id="pg-btn-5" class="pg-btn">PG 5</button>
+      </div>
+
+      <!-- ROUTES.benefits — Leistungs-Liste (dynamisch) -->
+      <div id="pg-benefits" style="display:none;">
+        <div class="pg-benefits-grid" id="pg-benefits-grid"></div>
+        <div id="pg-reform-note" style="font-size:0.75rem;color:var(--text);background:var(--glass-bg);border-left:3px solid #E0E0E0;padding:0.65rem 0.9rem;border-radius:0 6px 6px 0;margin-top:0.25rem;"></div>
+      </div>
+
+      <!-- Platzhalter -->
+      <div id="pg-placeholder" style="font-size:0.83rem;color:var(--text);padding:0.5rem 0;">
+        ← Pflegegrad auswählen, um alle Leistungsarten anzuzeigen.
+      </div>
+    </div>
+
+    <!-- Legal Guard-Rail §7a SGB XI -->
+    <div style="margin-top:1rem;padding:0.75rem 1rem;background:var(--glass-bg);border-radius:8px;border:1px solid rgba(224,224,224,0.25);">
+      <p style="font-size:0.72rem;color:var(--text);margin:0;line-height:1.5;">
+        <strong>Hinweis:</strong> Diese Informationen dienen der allgemeinen Unterstützung und Orientierung. Sie stellen keine Rechts-, Steuer- oder Sozialberatung dar. Für rechtsverbindliche Auskünfte wenden Sie sich an die kostenfreie <strong>Pflegeberatung nach § 7a SGB XI</strong> — Ihre Pflegekasse vermittelt einen persönlichen Pflegeberater.
+      </p>
+    </div>
+
+    <!-- Hilfsmittel-Guide §40 SGB XI — Beschaffungs-Logik -->
+    <div class="glass" style="padding:1.5rem 1.75rem;margin-top:1.25rem;">
+      <p class="section-label" style="margin-bottom:0.6rem;">§40 SGB XI · Hilfsmittel-Guide</p>
+      <h3 style="color:#E0E0E0;margin-bottom:1rem;">Wie Sie Hilfsmittel richtig beantragen.</h3>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin-bottom:1.25rem;">
+
+        <!-- Verbrauchsmaterialien -->
+        <div style="background:#5B7290;border-radius:10px;padding:1rem 1.1rem;">
+          <div style="font-size:0.65rem;font-weight:700;color:#FFFFFF;text-transform:uppercase;letter-spacing:0.07em;opacity:0.85;margin-bottom:0.3rem;">§40 Abs. 2 SGB XI</div>
+          <div style="font-size:1.05rem;font-weight:800;color:#FFFFFF;margin-bottom:0.15rem;">bis 42 €/Monat</div>
+          <div style="font-size:0.8rem;font-weight:700;color:#FFFFFF;margin-bottom:0.4rem;">Verbrauchsmaterialien</div>
+          <div style="font-size:0.72rem;color:rgba(255,255,255,0.8);line-height:1.5;">
+            <strong>Pflegebox:</strong> Monatliche Lieferung per Abo direkt vom Anbieter — kein Kassenantrag nötig.<br/>
+            <strong>Rechnungs-Erstattung:</strong> Belege sammeln, einreichen, Erstattung innerhalb 4 Wochen.
+          </div>
+        </div>
+
+        <!-- Technische Hilfsmittel -->
+        <div style="background:#5B7290;border-radius:10px;padding:1rem 1.1rem;">
+          <div style="font-size:0.65rem;font-weight:700;color:#FFFFFF;text-transform:uppercase;letter-spacing:0.07em;opacity:0.85;margin-bottom:0.3rem;">§40 Abs. 1 SGB XI</div>
+          <div style="font-size:1.05rem;font-weight:800;color:#FFFFFF;margin-bottom:0.15rem;">max. 25 € Zuzahlung</div>
+          <div style="font-size:0.8rem;font-weight:700;color:#FFFFFF;margin-bottom:0.4rem;">Technische Hilfsmittel</div>
+          <div style="font-size:0.72rem;color:rgba(255,255,255,0.8);line-height:1.5;">
+            Pflegebett, Rollator, Notrufknopf: 10 % des Preises — <strong>maximal 25 €</strong> Eigenbeteiligung. Antrag über Pflegekasse vor Beschaffung stellen.
+          </div>
+        </div>
+
+        <!-- SGB XI vs. SGB V Abgrenzung — grafisch getrennt -->
+        <div style="margin-bottom:0;">
+          <div style="font-size:0.65rem;font-weight:700;color:#E0E0E0;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.5rem;">Wichtige Abgrenzung: Wer zahlt was?</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;">
+            <div style="background:var(--glass-bg);border:2px solid #E0E0E0;border-top:3px solid #E0E0E0;border-radius:8px;padding:0.75rem 0.9rem;">
+              <div style="font-size:0.6rem;font-weight:800;color:#E0E0E0;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem;">🏥 SGB XI · Pflegekasse</div>
+              <div style="font-size:0.72rem;color:var(--text);line-height:1.5;"><strong>Pflegebett</strong><br/><strong>Lagerungshilfen</strong><br/><strong>Sturzschutz</strong><br/><span style="font-size:0.65rem;opacity:0.8;">pflegebedingt · max. 25 € Zuzahlung</span></div>
+            </div>
+            <div style="background:rgba(19,27,39,0.35);border:2px solid #5B7290;border-top:3px solid #5B7290;border-radius:8px;padding:0.75rem 0.9rem;">
+              <div style="font-size:0.6rem;font-weight:800;color:#E0E0E0;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem;">💊 SGB V · Krankenkasse</div>
+              <div style="font-size:0.72rem;color:var(--text);line-height:1.5;"><strong>Rollstuhl</strong><br/><strong>Gehhilfen</strong><br/><strong>Orthesen</strong><br/><span style="font-size:0.65rem;opacity:0.8;">ärztlich verordnet · kein Eigenanteil</span></div>
+            </div>
+          </div>
+          <div style="font-size:0.65rem;color:var(--text);margin-top:0.4rem;opacity:0.85;">Im Zweifel: Pflegeberatung nach §7a anfragen — die Abgrenzung entscheidet über Kostenträger und Zuzahlung.</div>
+        </div>
+      </div>
+
+      <!-- Legal Disclaimer unter Hilfsmittel -->
+      <p style="font-size:0.7rem;color:var(--text);background:var(--glass-bg);padding:0.6rem 0.8rem;border-radius:6px;margin:0;line-height:1.5;">
+        <strong>Keine Rechtsberatung.</strong> Angaben nach §40 SGB XI (Stand 01.01.2025). Individuelle Ansprüche können abweichen — verbindliche Klärung nur über Ihre Pflegekasse oder Pflegeberatung §7a.
+      </p>
+
+      <!-- Affiliate Native-Ad-Slot — Platzhalter, kein Drittanbieter-Script aktiv · 728x90 max (Leaderboard) -->
+      <div class="native-ad ad-container" role="complementary" aria-label="Anzeige: Empfohlene Hilfsmittel-Partner (Platzhalter, max. 728x90 px)">
+        <div class="ad-size-label">Max. 728x90 px</div>
+        <div class="native-ad-label">Anzeige · Empfohlene Partner</div>
+        <div class="native-ad-placeholder">Platzhalter — Affiliate-Partner für Hilfsmittel folgt</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+<!-- ═══════════════════════════════ 3b · WOHNEN & VERSORGUNG ═══ -->
+<section id="wohnen">
+  <div class="container">
+    <p class="section-label">§38a · §40 · §43 · §43c SGB XI · Wohnformen 2025</p>
+    <h2>Wohnen &amp; Versorgung — Ihre Optionen im Überblick.</h2>
+    <p style="font-size:0.95rem;color:#E0E0E0;max-width:660px;margin:0 auto 2rem;text-align:center;line-height:1.6;">
+      Von der Vollversorgung im Pflegeheim bis zum selbstbestimmten Leben in der Gemeinschaft:
+      Kennen Sie alle gesetzlich geförderten Wohnformen und ihre Leistungsansprüche.
+    </p>
+
+    <div class="wohn-grid">
+
+      <!-- Pflegeheim -->
+      <div class="wohn-card" id="wohnen-pflegeheim" data-wohnform="pflegeheim">
+        <div class="wohn-icon">🏥</div>
+        <h3>Pflegeheim — Vollstationäre Pflege</h3>
+        <p class="wohn-para">Vollverpflegung, 24h-Pflege und soziale Einbindung. Die Pflegekasse übernimmt pauschale Zuschüsse nach Pflegegrad — Eigenanteil (EEE + Unterkunft + Verpflegung) liegt bei Ihnen.</p>
+        <p class="wohn-para"><strong>Zuschüsse §43 PUEG 2025:</strong></p>
+        <span class="wohn-badge">PG 2: 805 €/M.</span>
+        <span class="wohn-badge">PG 3: 1.319 €/M.</span>
+        <span class="wohn-badge">PG 4: 1.855 €/M.</span>
+        <span class="wohn-badge">PG 5: 2.096 €/M.</span>
+        <p class="wohn-para" style="margin-top:0.75rem;"><strong>Leistungszuschlag §43c</strong> — reduziert Ihren EEE:</p>
+        <span class="wohn-badge wohn-badge--mid">0–12 M.: 15 %</span>
+        <span class="wohn-badge wohn-badge--mid">13–24 M.: 30 %</span>
+        <span class="wohn-badge wohn-badge--mid">25–36 M.: 50 %</span>
+        <span class="wohn-badge">&gt; 36 M.: 75 %</span>
+      </div>
+
+      <!-- Wohngruppe §38a -->
+      <div class="wohn-card" id="wohnen-wohngruppe" data-wohnform="wohngruppe">
+        <div class="wohn-icon">🏘️</div>
+        <h3>Ambulant betreute Wohngruppe (§38a)</h3>
+        <p class="wohn-para">Gemeinschaftliches Wohnen für 3–12 pflegebedürftige Menschen mit geteilter Assistenz — selbstbestimmter als das Pflegeheim, gemeinschaftlicher als die Einzel-WG.</p>
+        <p class="wohn-para"><strong>Förderungen §38a SGB XI:</strong></p>
+        <span class="wohn-badge">Wohngruppenzuschlag: 224 €/M.</span>
+        <span class="wohn-badge">Anschubfinanzierung: 2.613 € (einmalig)</span>
+        <p class="wohn-para" style="margin-top:0.75rem;">Kombinierbar mit Pflegegeld §37, Sachleistungen §36 und Entlastungsbetrag §45b (131 €/M.). Ideal für PG 2–4 mit Wunsch nach Gemeinschaft und Autonomie.</p>
+      </div>
+
+      <!-- Mehrgenerationen -->
+      <div class="wohn-card" id="wohnen-mehrgenerationen" data-wohnform="mehrgenerationen">
+        <div class="wohn-icon">👨‍👩‍👧‍👦</div>
+        <h3>Mehrgenerationenwohnen</h3>
+        <p class="wohn-para">Jung und Alt unter einem Dach — auf Gegenseitigkeit. Jüngere Mitbewohnende übernehmen Alltagshilfen (Einkauf, Begleitung), ältere Menschen geben Erfahrung und Gemeinschaft zurück.</p>
+        <p class="wohn-para"><strong>Prinzip:</strong> Kein formaler Pflegevertrag — aktives Miteinander auf Vertrauensbasis. Ergänzend einsetzbar mit ambulanten Pflegediensten (§36) und Pflegegeld §37.</p>
+        <p class="wohn-para"><strong>Geeignet für:</strong> PG 1–3 mit sozialem Netzwerk, mobilem Alltag und Wunsch nach aktivem, gemeinschaftlichem Leben.</p>
+      </div>
+
+      <!-- Häuslich §40 -->
+      <div class="wohn-card" id="wohnen-haeuslich" data-wohnform="haeuslich">
+        <div class="wohn-icon">🏠</div>
+        <h3>Wohnen mit Pflegeleistung — Häuslich</h3>
+        <p class="wohn-para">Zu Hause bleiben mit professioneller Unterstützung: ambulanter Pflegedienst, 24h-Betreuungskraft oder pflegende Angehörige. Die Pflegekasse fördert auch Wohnungsanpassungen.</p>
+        <p class="wohn-para"><strong>Wohnumfeld-Maßnahmen §40 Abs. 4 SGB XI:</strong></p>
+        <span class="wohn-badge">bis 4.180 € je Maßnahme</span>
+        <span class="wohn-badge wohn-badge--mid">mehrfach beantragbar</span>
+        <p class="wohn-para" style="margin-top:0.75rem;">Beispiele: Türverbreiterung · Bodengleiche Dusche · Treppenlifter · Haltegriffe · Rampen. Plus: Pflegegeld §37 + Entlastungsbetrag §45b.</p>
+      </div>
+
+    </div><!-- /.wohn-grid -->
+
+    <div style="text-align:center;margin-top:2rem;">
+      <p style="font-size:0.85rem;color:#E0E0E0;margin-bottom:1rem;">Welche Wohnform passt zu Ihrer Situation? Wir beraten Sie persönlich zu allen Unterstützungsleistungen.</p>
+      <a href="#kontakt" class="btn btn-primary">Persönliche Beratung anfragen →</a>
+    </div>
+
+    <!-- Affiliate Native-Ad-Slot — Platzhalter, kein Drittanbieter-Script aktiv · 728x90 max (Leaderboard) -->
+    <div class="native-ad ad-container" role="complementary" aria-label="Anzeige: Empfohlene Wohnumfeld-Partner (Platzhalter, max. 728x90 px)">
+      <div class="ad-size-label">Max. 728x90 px</div>
+      <div class="native-ad-label">Anzeige · Empfohlene Partner</div>
+      <div class="native-ad-placeholder">Platzhalter — Affiliate-Partner für Wohnumfeld-Anpassung folgt</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════════════ 3c · DNQP ═══ -->
+<section id="dnqp">
+  <div class="container">
+    <p class="section-label">DNQP 2020 · Sicherheit &amp; Wissenschaftliche Standards</p>
+    <h2>Werkzeuge, die Pflege sichtbar machen.</h2>
+    <p class="lead" style="margin-bottom:1.5rem;">Gut dokumentierte Pflege schützt — den pflegebedürftigen Menschen und Sie. Diese sechs Instrumente sind der Standard, nach dem Pflegekassen, Ärzte und Gerichte urteilen.</p>
+    <div style="background:var(--glass-bg);border-left:3px solid var(--petrol);border-radius:0 10px 10px 0;padding:0.75rem 1rem;margin-bottom:1.5rem;">
+      <p style="font-size:0.855rem;color:var(--text);">Ihre Belastung als pflegende Person ist messbar: Der <strong>ZBI-22</strong> (↑ Ressourcen) zeigt objektiv, wann Sie Unterstützung brauchen. Die sechs DNQP-Instrumente unten sichern die Qualität der Pflege selbst — Schmerz, Sturz, Haut, Ernährung, Mobilität.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin-bottom:1.5rem;" id="dnqp-grid">
+      <div class="glass" data-standard="besd" style="padding:1.25rem 1.5rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.6rem;">
+          <h3 style="font-size:1rem;">BESD-Skala</h3>
+          <span style="font-size:0.7rem;font-weight:700;background:var(--glass-bg);color:var(--petrol);padding:0.2rem 0.5rem;border-radius:6px;">Schmerz</span>
+        </div>
+        <p style="font-size:0.82rem;color:var(--text);">Beurteilung von Schmerzen bei Demenz. 5 Kategorien, Skala 0–10. Einziges validiertes Instrument für non-verbale Demenzkranke.</p>
+        <p style="font-size:0.75rem;color:var(--petrol);margin-top:0.5rem;font-weight:600;">→ In Adea App integriert</p>
+      </div>
+      <div class="glass" data-standard="tinetti" style="padding:1.25rem 1.5rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.6rem;">
+          <h3 style="font-size:1rem;">Tinetti-Test</h3>
+          <span style="font-size:0.7rem;font-weight:700;background:var(--glass-bg);color:var(--petrol);padding:0.2rem 0.5rem;border-radius:6px;">Sturzrisiko</span>
+        </div>
+        <p style="font-size:0.82rem;color:var(--text);">Gang- und Balancetest (28 Punkte). Score &lt;19: erhöhtes Sturzrisiko. Score &lt;15: stark erhöhtes Sturzrisiko. Dokumentationspflicht.</p>
+        <p style="font-size:0.75rem;color:var(--petrol);margin-top:0.5rem;font-weight:600;">→ Verlaufstracking in Adea</p>
+      </div>
+      <div class="glass" data-standard="braden" style="padding:1.25rem 1.5rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.6rem;">
+          <h3 style="font-size:1rem;">Braden-Skala</h3>
+          <span style="font-size:0.7rem;font-weight:700;background:var(--glass-bg);color:var(--petrol);padding:0.2rem 0.5rem;border-radius:6px;">Dekubitus</span>
+        </div>
+        <p style="font-size:0.82rem;color:var(--text);">6 Subskalen, Score 6–23. Score ≤18: Dekubitusrisiko. Tägliche Dokumentation bei bettlägerigen Pflegebedürftigen Pflichtstandard.</p>
+        <p style="font-size:0.75rem;color:var(--petrol);margin-top:0.5rem;font-weight:600;">→ Tagesprotokoll in Care Diary</p>
+      </div>
+      <div class="glass" data-standard="who" style="padding:1.25rem 1.5rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.6rem;">
+          <h3 style="font-size:1rem;">WHO-Stufenschema</h3>
+          <span style="font-size:0.7rem;font-weight:700;background:var(--glass-bg);color:var(--petrol);padding:0.2rem 0.5rem;border-radius:6px;">Analgesie</span>
+        </div>
+        <p style="font-size:0.82rem;color:var(--text);">3-Stufen-Schema der Weltgesundheitsorganisation zur Schmerztherapie. Stufe I–III: nicht-opioid → schwach opioid → stark opioid.</p>
+        <p style="font-size:0.75rem;color:var(--petrol);margin-top:0.5rem;font-weight:600;">→ Verknüpfung mit BESD-Skala</p>
+      </div>
+      <div class="glass" data-standard="mna" style="padding:1.25rem 1.5rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.6rem;">
+          <h3 style="font-size:1rem;">MNA</h3>
+          <span style="font-size:0.7rem;font-weight:700;background:var(--glass-bg);color:var(--petrol);padding:0.2rem 0.5rem;border-radius:6px;">Ernährung</span>
+        </div>
+        <p style="font-size:0.82rem;color:var(--text);">Mini Nutritional Assessment: 18 Items, Score 0–30. Score &lt;17: Mangelernährung. Bei Demenzerkrankten bis zu 40 % betroffen.</p>
+        <p style="font-size:0.75rem;color:var(--petrol);margin-top:0.5rem;font-weight:600;">→ Screening-Modul in Adea</p>
+      </div>
+      <div class="glass" data-standard="kinaesthetik" style="padding:1.25rem 1.5rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.6rem;">
+          <h3 style="font-size:1rem;">Kinästhetik</h3>
+          <span style="font-size:0.7rem;font-weight:700;background:var(--glass-bg);color:var(--petrol);padding:0.2rem 0.5rem;border-radius:6px;">Transfer</span>
+        </div>
+        <p style="font-size:0.82rem;color:var(--text);">Bewegungslehre für professionelle Pflege. Ressourcen-aktivierende Transfertechniken reduzieren Pflegeschäden und fördern Mobilität.</p>
+        <p style="font-size:0.75rem;color:var(--petrol);margin-top:0.5rem;font-weight:600;">→ Video-Module in Adea</p>
+      </div>
+    </div>
+
+    <div class="insight-box" role="note" aria-label="Wussten Sie schon: Mobilität und Schonung">
+      <p class="insight-label">💡 Wussten Sie schon?</p>
+      <p class="insight-mythos"><strong>Mythos:</strong> „Schonung schützt — wer sich weniger bewegt, fällt seltener und bleibt sicherer."</p>
+      <p class="insight-realitaet"><strong>Realität:</strong> Der DNQP-Expertenstandard Mobilität widerlegt das Schonungs-Axiom klar: gezielte Aktivität statt Bettlägerigkeit erhält Muskelkraft, Gleichgewicht und Selbstständigkeit — und senkt so das Sturzrisiko, statt es zu erhöhen (siehe Tinetti-Test &amp; Kinästhetik oben).</p>
+    </div>
+
+    <div class="glass" style="padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <p style="font-weight:600;color:var(--text);">Alle 6 Assessments digital dokumentieren</p>
+        <p style="font-size:0.825rem;color:var(--text);">FHIR-konforme Protokolle · Verlaufskurven · Exportfähig für Pflegegutachten</p>
+      </div>
+      <a href="#download" class="btn btn-primary">Adea holen →</a>
+    </div>
+
+    <!-- Affiliate Native-Ad-Slot — Platzhalter, kein Drittanbieter-Script aktiv · 728x90 max -->
+    <div class="native-ad ad-container" role="complementary" aria-label="Anzeige: Empfohlene Partner (Platzhalter, max. 728x90 px)">
+      <div class="ad-size-label">Max. 728x90 px</div>
+      <div class="native-ad-label">Anzeige · Empfohlene Partner</div>
+      <div class="native-ad-placeholder">Platzhalter — Affiliate-Partner folgt</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════════════ 4 · DIREKT-ABO ═══ -->
+<section id="abo">
+  <div class="container">
+    <p class="section-label">Direkt-Abo · Unabhängig</p>
+    <h2>Adea: Direkt abonnieren.</h2>
+    <p class="lead" style="margin-bottom:2rem;">Zwei eigenständige Lösungen, direkt bei IRIS Digital abonnierbar — ohne Kassenverfahren, ohne Antrag.</p>
+
+    <div class="abo-split">
+
+      <div class="abo-left" style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="abo-app-header">
+          <div class="abo-app-icon">🛡️</div>
+          <div>
+            <div style="font-size:1.3rem;font-weight:800;color:var(--text);">Adea</div>
+            <div style="font-size:0.78rem;font-weight:600;color:var(--petrol);text-transform:uppercase;letter-spacing:0.07em;">Sicherheit, die mitdenkt</div>
+          </div>
+        </div>
+        <div style="font-size:2rem;font-weight:800;color:var(--petrol);">6,99&nbsp;€<span style="font-size:0.9rem;font-weight:600;color:var(--text);">&nbsp;/ Monat</span></div>
+        <p style="font-size:0.875rem;color:var(--text);line-height:1.65;">
+          <strong style="color:var(--text);">Demenz-Souveränität im Alltag:</strong> Handlungssicherheit in schwierigen Momenten, aktivierende Pflege, die Fähigkeiten erhält statt zu ersetzen.
+          Ihre Daten bleiben geschützt — Zero-Knowledge-Verschlüsselung auf dem Gerät.
+        </p>
+        <p style="font-size:0.8rem;color:var(--text);line-height:1.6;"><strong>6 Monate Mindestlaufzeit</strong>, danach monatlich kündbar. <strong>14 Tage Widerrufsrecht.</strong></p>
+        <p style="font-size:0.7rem;color:var(--text);opacity:0.75;line-height:1.5;">Rechtsgrundlage digitaler Pflegeanwendungen (DiPA): <strong>§ 40a SGB XI</strong>.</p>
+        <!-- SIMULATION MODE: kein echter Checkout, keine echte Zahlung. Siehe Root-CLAUDE.md § Subscription-Bridge. -->
+        <button type="button" class="btn btn-ghost" style="font-size:0.8rem;" onclick="simulateCheckout('shield')">🧪 Demo-Checkout starten (Testmodus)</button>
+        <p id="checkout-status-shield" style="font-size:0.78rem;color:var(--petrol);min-height:1.2em;"></p>
+        <a id="download-shield-btn" href="#" aria-disabled="true" class="btn btn-primary" style="opacity:0.4;pointer-events:none;text-align:center;" onclick="return false;">⬇ App herunterladen (erst nach Demo-Checkout)</a>
+      </div>
+
+      <div class="abo-right" style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="abo-app-header">
+          <div class="abo-app-icon">📓</div>
+          <div>
+            <div style="font-size:1.3rem;font-weight:800;color:var(--text);">Care Diary</div>
+            <div style="font-size:0.78rem;font-weight:600;color:var(--petrol);text-transform:uppercase;letter-spacing:0.07em;">Sicher dokumentieren</div>
+          </div>
+        </div>
+        <div style="font-size:2rem;font-weight:800;color:var(--petrol);">4,75&nbsp;€<span style="font-size:0.9rem;font-weight:600;color:var(--text);">&nbsp;/ Monat</span></div>
+        <p style="font-size:0.875rem;color:var(--text);line-height:1.65;">
+          <strong style="color:var(--text);">30&nbsp;% Zeitgewinn für das Miteinander:</strong> mehr Verständnis für den Pflegealltag, statt nur zu protokollieren.
+          Schutz Ihrer Familiendaten — offline, lokal auf dem Gerät.
+        </p>
+        <p style="font-size:0.8rem;color:var(--text);line-height:1.6;"><strong>6 Monate Mindestlaufzeit</strong>, danach monatlich kündbar. <strong>14 Tage Widerrufsrecht.</strong></p>
+        <button type="button" class="btn btn-ghost" style="font-size:0.8rem;" onclick="simulateCheckout('diary')">🧪 Demo-Checkout starten (Testmodus)</button>
+        <p id="checkout-status-diary" style="font-size:0.78rem;color:var(--petrol);min-height:1.2em;"></p>
+        <a id="download-diary-btn" href="#" aria-disabled="true" class="btn btn-primary" style="opacity:0.4;pointer-events:none;text-align:center;" onclick="return false;">⬇ App herunterladen (erst nach Demo-Checkout)</a>
+      </div>
+
+    </div>
+
+    <!-- USP-Cards (v4.11) — Preise/Konditionen gemäß Root-CLAUDE.md § Subscription-Bridge ("Geplante Konditionen"),
+         CTAs sind ehrliche Vorregistrierungs-Links (mailto), kein Stripe-Checkout vorhanden — echte Buchung erst mit Release. -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;margin-top:1.5rem;">
+      <div class="glass" style="padding:1.5rem;">
+        <h3 style="color:var(--petrol);margin-bottom:0.5rem;">Adea — Ihr digitaler Schutzbrief für die Demenz-Pflege.</h3>
+        <ul style="font-size:0.85rem;color:var(--text);line-height:1.55;margin:0 0 0.85rem;padding-left:1.1rem;">
+          <li><strong>Demenz-Souveränität:</strong> 38 klinische Fachmodule geben Ihnen die Sicherheit, in jeder Phase richtig zu handeln.</li>
+          <li><strong>Aktivierende Pflege:</strong> Fördern Sie die Selbstständigkeit durch Profi-Techniken wie die fachgerechte Hohllagerung.</li>
+          <li><strong>Prävention statt Krise:</strong> Vermeiden Sie Risiken wie Dekubitus durch systematische, evidenzbasierte Anleitungen.</li>
+          <li><strong>Würde bewahren:</strong> Schützen Sie die Autonomie Ihres Angehörigen gemäß den Standards der Pflege-Charta.</li>
+        </ul>
+        <p style="font-size:0.82rem;color:var(--petrol);font-style:italic;line-height:1.55;margin-bottom:1rem;">Behalten Sie die Kontrolle in komplexen Situationen und schenken Sie Ihrem Angehörigen ein Leben in Würde – wissenschaftlich fundiert und einfach erklärt.</p>
+        <a href="#download" class="btn btn-primary" style="display:block;text-align:center;">🛡️ Lösung entdecken (ab 6,99&nbsp;€/Mo)</a>
+        <p style="font-size:0.7rem;color:var(--text);margin-top:0.5rem;opacity:0.8;">Start ab Release Sommer 2026 — jetzt unverbindlich vorregistrieren.</p>
+      </div>
+      <div class="glass" style="padding:1.5rem;">
+        <h3 style="color:var(--petrol);margin-bottom:0.5rem;">Care Diary — Ihr digitales Gedächtnis für den Pflegealltag.</h3>
+        <ul style="font-size:0.85rem;color:var(--text);line-height:1.55;margin:0 0 0.85rem;padding-left:1.1rem;">
+          <li><strong>Verständnis statt Verzweiflung:</strong> Verhaltens-Trigger erkennen, weniger Stress im Alltag.</li>
+          <li><strong>Zeitgewinn für das Miteinander:</strong> bis zu 30&nbsp;% Zeitersparnis durch KI-gestützte Dokumentations-Ordnung.</li>
+          <li><strong>Kompetenz bei Arztgesprächen:</strong> strukturierte Berichte zu Schmerz und Mobilität auf Knopfdruck.</li>
+          <li><strong>Absolute Privatsphäre:</strong> Schutz intimster Daten durch Zero-Knowledge-Verschlüsselung <span style="opacity:0.7;font-size:0.78rem;">(Profi-Standard inklusive)</span>.</li>
+        </ul>
+        <p style="font-size:0.82rem;color:var(--petrol);font-style:italic;line-height:1.55;margin-bottom:1rem;">Verstehen Sie, was den Alltag belastet, erkennen Sie die Stärken Ihrer Familie und gewinnen Sie Zeit für das, was wirklich zählt – bei maximaler Datensicherheit.</p>
+        <a href="#download" class="btn btn-primary" style="display:block;text-align:center;">📓 Care Diary starten (4,75&nbsp;€/Mo)</a>
+        <p style="font-size:0.7rem;color:var(--text);margin-top:0.5rem;opacity:0.8;">Start ab Release Sommer 2026 — jetzt unverbindlich vorregistrieren.</p>
+      </div>
+    </div>
+    <p style="font-size:0.72rem;color:var(--text);text-align:center;margin-top:1rem;opacity:0.85;">6 Monate Mindestlaufzeit, danach monatlich kündbar. 14 Tage volles Widerrufsrecht.</p>
+
+    <!-- SPEC, nicht implementiert: kein Stripe-Backend vorhanden. Button zeigt nur die Widerrufsbelehrung an,
+         löst keine echte Rückzahlung aus. Siehe Root-CLAUDE.md § Subscription-Bridge. -->
+    <div style="margin-top:1rem;text-align:center;">
+      <div class="ci-toggle" role="button" tabindex="0" onclick="toggleWiderruf()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleWiderruf();}" aria-expanded="false" aria-controls="widerruf-info">
+        <div class="track"><div class="knob"></div></div>
+        <span style="font-weight:700;color:var(--petrol);">↩️ Widerruf erklären</span>
+      </div>
+      <div id="widerruf-info" style="display:none;max-width:640px;margin:1rem auto 0;text-align:left;background:var(--glass-bg);border:1px solid rgba(224,224,224,0.25);border-radius:10px;padding:1rem 1.25rem;font-size:0.8rem;color:var(--text);line-height:1.6;">
+        <strong style="color:var(--petrol);">Widerrufsrecht:</strong> Sie haben das Recht, binnen 14 Tagen ohne Angabe von Gründen diesen Vertrag zu widerrufen. Die Widerrufsfrist beträgt 14 Tage ab Vertragsabschluss. Um Ihr Widerrufsrecht auszuüben, müssen Sie uns (IRIS Digital, Hohenfelsstraße 34, 35232 Dautphetal, r.krieg.home@gmail.com) mittels einer eindeutigen Erklärung (z.&nbsp;B. per E-Mail) über Ihren Entschluss informieren. Nach Ablauf der Mindestlaufzeit von 6 Monaten ist eine Kündigung jederzeit zum Monatsende möglich.
+      </div>
+    </div>
+
+    <!-- Affiliate Native-Ad-Slot — Platzhalter, kein Drittanbieter-Script aktiv · 728x90 max -->
+    <div class="native-ad ad-container" role="complementary" aria-label="Anzeige: Empfohlene Partner (Platzhalter, max. 728x90 px)">
+      <div class="ad-size-label">Max. 728x90 px</div>
+      <div class="native-ad-label">Anzeige · Empfohlene Partner</div>
+      <div class="native-ad-placeholder">Platzhalter — Affiliate-Partner folgt</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══ RECHT & VORSORGE (2026-08-17) — Demo-Gate: echter Endpoint zuerst,
+     Fallback Testmodus wie #abo, s. simulateLegalCheckout() weiter unten. -->
+<section id="recht-vorsorge">
+  <div class="container">
+    <p class="section-label">Rechtliche Vorsorge · Demenzspezifisch</p>
+    <h2>Recht &amp; Vorsorge.</h2>
+    <p class="lead" style="margin-bottom:1.5rem;">Vorlagen aus dem Internet sind generisch. Diese Dokumente sind auf die klinische Realität von Demenzverläufen zugeschnitten und schließen die juristische Kausalkette zwischen Patientenverfügung, Vollmacht und Betreuungsgericht.</p>
+
+    <div class="glass" style="padding:1.5rem;border-radius:16px;margin-bottom:2.5rem;">
+      <p style="font-weight:700;color:var(--petrol);margin-bottom:1rem;font-size:1.05rem;">Warum nicht einfach eine Gratis-Vorlage?</p>
+      <div style="display:grid;gap:1.1rem;">
+        <div>
+          <strong style="color:var(--petrol);">Konkrete klinische Trigger statt „im Falle schwerer Krankheit":</strong>
+          <span style="color:var(--text);"> 5 exakt definierte Situationen (u. a. fortgeschrittene Demenz nach FAST-Stadium 7/GDS-Stadium 7, apallisches Syndrom, Locked-in-Syndrom) statt vager Formulierungen, die Ärzte im Ernstfall frei interpretieren müssen.</span>
+        </div>
+        <div>
+          <strong style="color:var(--petrol);">6 einzeln entscheidbare Maßnahmen statt einer Pauschalklausel:</strong>
+          <span style="color:var(--text);"> Reanimation, Beatmung, künstliche Ernährung, Flüssigkeitsgabe, Dialyse und Medikamente/Blutprodukte je separat geregelt — genau die Granularität, die Kliniken und Gerichte brauchen, um Streit zu vermeiden.</span>
+        </div>
+        <div>
+          <strong style="color:var(--petrol);">Drei Dokumente, die aufeinander verweisen:</strong>
+          <span style="color:var(--text);"> Die Vollmacht verpflichtet den Bevollmächtigten ausdrücklich, die Patientenverfügung durchzusetzen; die Betreuungsverfügung greift, falls Gericht oder Bank die Vollmacht aus Formgründen ablehnen. Drei unabhängig heruntergeladene Gratis-Vorlagen von verschiedenen Seiten haben diese Verzahnung nicht — das ist genau die Lücke, an der es in der Praxis oft scheitert.</span>
+        </div>
+        <div>
+          <strong style="color:var(--petrol);">Demenz-spezifisch statt allgemein:</strong>
+          <span style="color:var(--text);"> Nahrungsverweigerung im fortgeschrittenen Demenzstadium wird explizit als natürlicher Sterbewille anerkannt (keine Zwangsernährung) — ein Punkt, den generische Vorlagen für den allgemeinen Krankheitsfall meist gar nicht adressieren.</span>
+        </div>
+        <div>
+          <strong style="color:var(--petrol);">Freiheitsentziehende Maßnahmen explizit erlaubt (§ 1831 BGB):</strong>
+          <span style="color:var(--text);"> Bettgitter, Fixierung, geschlossene Unterbringung bei akuter Selbstgefährdung — ohne diese ausdrückliche Regelung dürfen Pflegeeinrichtungen oft nicht handeln, selbst wenn Angehörige es für nötig halten.</span>
+        </div>
+        <div>
+          <strong style="color:var(--petrol);">Aktueller Rechtsstand:</strong>
+          <span style="color:var(--text);"> Paragraphen nach der Betreuungsrechtsreform 2023 — viele frei kursierende Vorlagen zitieren noch die alte §1901a-Nummerierung von vor der Reform.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="abo-split">
+      <div class="abo-left" style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="abo-app-header">
+          <div class="abo-app-icon">⚖️</div>
+          <div>
+            <div style="font-size:1.3rem;font-weight:800;color:var(--text);">Recht &amp; Vorsorge Bundle</div>
+            <div style="font-size:0.78rem;font-weight:600;color:var(--petrol);text-transform:uppercase;letter-spacing:0.07em;">4 Dokumente, aufeinander abgestimmt</div>
+          </div>
+        </div>
+        <div style="font-size:2rem;font-weight:800;color:var(--petrol);">49,00&nbsp;€<span style="font-size:0.9rem;font-weight:600;color:var(--text);">&nbsp;einmalig</span></div>
+        <p style="font-size:0.875rem;color:var(--text);line-height:1.65;">
+          <strong style="color:var(--text);">Patientenverfügung, Vorsorgevollmacht, Betreuungsverfügung und Vorsorgemappe-Checkliste</strong> — mit konkreten Handlungsanweisungen für die fünf klinisch häufigsten Situationen (u. a. fortgeschrittene Demenz, FAST-Stadium 7) statt allgemeiner Floskeln.
+        </p>
+        <p style="font-size:0.8rem;color:var(--text);line-height:1.6;">Rechtsgrundlage: <strong>§ 1827 BGB</strong> (Patientenverfügung), <strong>§§ 1829, 1831 BGB</strong> (Vollmacht), <strong>§§ 1816, 1821 BGB</strong> (Betreuungsverfügung) — Stand Betreuungsrechtsreform 2023.</p>
+        <p style="font-size:0.7rem;color:var(--text);opacity:0.75;line-height:1.5;">Ersetzt keine individuelle Rechtsberatung. Alle Angaben ohne Gewähr.</p>
+        <!-- DEMO-GATE: kein echter Kauf ohne konfigurierten Stripe-Account, s. Root-CLAUDE.md § Demo-Gate-Policy -->
+        <button type="button" class="btn btn-ghost" style="font-size:0.8rem;" onclick="simulateLegalCheckout('legal_bundle')">🧪 Demo-Checkout starten (Testmodus)</button>
+        <p id="checkout-status-legal_bundle" style="font-size:0.78rem;color:var(--petrol);min-height:1.2em;"></p>
+        <a id="download-legal_bundle-btn" href="#" aria-disabled="true" class="btn btn-primary" style="opacity:0.4;pointer-events:none;text-align:center;" onclick="return false;">⬇ Bundle herunterladen (erst nach Demo-Checkout)</a>
+      </div>
+
+      <div class="abo-right" style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="abo-app-header">
+          <div class="abo-app-icon">🏠</div>
+          <div>
+            <div style="font-size:1.3rem;font-weight:800;color:var(--text);">Notarielle Vorbereitung — Immobilie</div>
+            <div style="font-size:0.78rem;font-weight:600;color:var(--petrol);text-transform:uppercase;letter-spacing:0.07em;">Einzeldokument, nicht im Bundle</div>
+          </div>
+        </div>
+        <div style="font-size:2rem;font-weight:800;color:var(--petrol);">12,99&nbsp;€<span style="font-size:0.9rem;font-weight:600;color:var(--text);">&nbsp;einmalig</span></div>
+        <p style="font-size:0.875rem;color:var(--text);line-height:1.65;">
+          Leitfaden für den Notartermin bei gegenseitiger Immobilienübertragung unter Ehepartnern: Vertragsbestandteile, Kostenkalkulation (GNotKG) und die <strong>10-Jahres-Frist nach § 528 BGB</strong> beim Sozialhilferegress.
+        </p>
+        <p style="font-size:0.7rem;color:var(--text);opacity:0.75;line-height:1.5;">Strukturierte Gesprächsgrundlage für den Notar, kein Vertragsentwurf. Alle Angaben ohne Gewähr.</p>
+        <button type="button" class="btn btn-ghost" style="font-size:0.8rem;" onclick="simulateLegalCheckout('legal_immobilie')">🧪 Demo-Checkout starten (Testmodus)</button>
+        <p id="checkout-status-legal_immobilie" style="font-size:0.78rem;color:var(--petrol);min-height:1.2em;"></p>
+        <a id="download-legal_immobilie-btn" href="#" aria-disabled="true" class="btn btn-primary" style="opacity:0.4;pointer-events:none;text-align:center;" onclick="return false;">⬇ PDF herunterladen (erst nach Demo-Checkout)</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════════════ TAGESRESIDENZ ═══ -->
+<section id="tagesresidenz">
+  <div class="container" style="max-width:760px;">
+    <p class="section-label">Lebensgestaltung · §41 SGB XI · Tagesresidenz</p>
+    <h2>Die Tagesresidenz — Ort der Würde.</h2>
+    <p class="lead" style="margin-bottom:1.25rem;">Ein Ort, der empfängt. Der Raum gibt, Struktur schenkt und Gemeinschaft ermöglicht — ohne zu vereinnahmen. Jeden Morgen neu.</p>
+
+    <!-- Hero-Asset: Flyer Würdevoller Alltag -->
+    <div style="text-align:center;margin-bottom:1.75rem;">
+      <p style="font-size:0.72rem;font-weight:700;color:var(--petrol);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.6rem;">Die Tagesresidenz: Würdevoller Alltag</p>
+      <img id="infografik-tagesresidenz-img"
+           class="flyer-card-img"
+           src="assets/infografik-tagesresidenz.png"
+           alt="Flyer: Die Tagesresidenz — Würdevoller Alltag. Gast-Status, Zeit-Brücke, Wohlbefinden und Stolz im Tageskontor. Zum Vergrößern klicken."
+           title="Zum Vergrößern klicken"
+           onclick="openFlyerModal()"
+           onerror="this.style.display='none';document.getElementById('infografik-placeholder').style.display='flex';">
+      <p style="font-size:0.8rem;font-weight:700;color:var(--text);margin:0.5rem 0 0.75rem;letter-spacing:0.01em;">
+        „Hilfe annehmen ist keine Schwäche — es ist Stärke."
+      </p>
+      <div id="infografik-placeholder"
+           style="display:none;background:rgba(91,114,144,0.15);border:2px dashed #5B7290;border-radius:14px;padding:2.5rem 1.5rem;flex-direction:column;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+        <div style="font-size:2.5rem;">🌉</div>
+        <div style="font-weight:700;color:var(--petrol);font-size:0.95rem;">Die Tagesresidenz: Würdevoller Alltag</div>
+        <div style="font-size:0.72rem;color:var(--text);opacity:0.8;">Flyer-Asset bereit — PNG ablegen unter <code>assets/infografik-tagesresidenz.png</code></div>
+      </div>
+      <button onclick="downloadInfografik()" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:0.5rem;font-size:0.875rem;background:var(--mint-primary);color:var(--petrol-dk);">
+        ⬇ Flyer: Würdevoller Alltag herunterladen
+      </button>
+    </div>
+
+    <!-- Content-Sync: Wohlbefinden & Stolz -->
+    <div style="background:rgba(91,114,144,0.12);border-left:3px solid #5B7290;border-radius:0 8px 8px 0;padding:0.85rem 1.1rem;margin-bottom:1.5rem;">
+      <p style="font-size:0.78rem;color:var(--text);margin:0;line-height:1.6;"><strong>Wohlbefinden und Stolz</strong> entstehen, wenn Menschen aktiv teilhaben — nicht versorgt werden. Die Tagesresidenz schafft Raum für eigene Leistungen, soziale Anerkennung und die Erfahrung: <em>Ich kann noch etwas.</em> Das stärkt die Identität und wirkt unmittelbar auf Stimmung, Motivation und die Qualität der Beziehung zu Angehörigen.</p>
+    </div>
+
+    <!-- Terminology-Shift Callout -->
+    <div style="background:var(--glass-bg);border-left:4px solid #E0E0E0;border-radius:0 10px 10px 0;padding:1rem 1.25rem;margin-bottom:1.75rem;">
+      <p style="font-size:0.72rem;font-weight:700;color:#E0E0E0;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.3rem;">Sprachliche Aufwertung</p>
+      <p style="font-size:0.88rem;font-weight:600;color:var(--text);margin-bottom:0.3rem;">„Tagespflege" ist der falsche Begriff — und ein denunzierender dazu.</p>
+      <p style="font-size:0.78rem;color:var(--text);margin:0;">Das Wort reduziert einen Ort der Begegnung und Gastfreundschaft auf Pflege-Verwaltung. Die <strong>Tagesresidenz</strong> ist ein Haus, das Menschen willkommen heißt — kein Versorgungs-Apparat.</p>
+    </div>
+
+    <!-- Drei Kernbotschaften -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;margin-bottom:1.75rem;">
+      <!-- Gastfreundschaft: Gast-Status + Generationengerechtigkeit -->
+      <div style="background:var(--glass-bg);border:1px solid rgba(224,224,224,0.25);border-top:3px solid #5B7290;border-radius:12px;padding:1.1rem 1.25rem;">
+        <div class="card-emoji" style="font-size:1.4rem;margin-bottom:0.5rem;">🤝</div>
+        <div style="font-size:0.82rem;font-weight:700;color:var(--text);margin-bottom:0.35rem;">Gastfreundschaft auf Augenhöhe</div>
+        <div style="font-size:0.76rem;color:var(--text);line-height:1.55;">Die Tagesresidenz empfängt — nicht betreut. Der <strong>Gast-Status</strong> schützt die Würde: Kein Patient, kein Fall — ein Mensch mit Geschichte.</div>
+        <div style="margin-top:0.5rem;padding:0.4rem 0.6rem;background:rgba(91,114,144,0.2);border-radius:6px;font-size:0.68rem;color:var(--petrol);font-weight:600;">Generationengerechtigkeit: Gute Begleitung im Alter ist kein Privileg — sie ist das Fundament einer fairen Gesellschaft.</div>
+      </div>
+      <!-- Zeit-Brücke: grafische Autonomie ↔ Entlastung Brücke -->
+      <div style="background:var(--glass-bg);border:1px solid rgba(224,224,224,0.25);border-top:3px solid #5B7290;border-radius:12px;padding:1.1rem 1.25rem;">
+        <div class="card-emoji" style="font-size:1.4rem;margin-bottom:0.5rem;">🌉</div>
+        <div style="font-size:0.82rem;font-weight:700;color:var(--text);margin-bottom:0.35rem;">Zeit-Brücke</div>
+        <div style="font-size:0.76rem;color:var(--text);line-height:1.55;margin-bottom:0.5rem;">Die Tagesresidenz überbrückt die Zeit, in der Angehörige arbeiten oder sich erholen müssen. Sie schafft <strong>Qualitätszeit statt Pflege-Last</strong>: Wenn Angehörige zurückkehren, begegnen sie einem Menschen — nicht einem Pflegefall.</div>
+        <div style="display:flex;align-items:center;gap:0.3rem;font-size:0.65rem;font-weight:700;flex-wrap:wrap;">
+          <span style="background:#E0E0E0;color:#fff;border-radius:4px;padding:0.2rem 0.45rem;">Autonomie · Gast</span>
+          <span style="color:#5B7290;font-size:0.9rem;">⟷</span>
+          <span style="background:#5B7290;color:#FFFFFF;border-radius:4px;padding:0.2rem 0.45rem;">Qualitätszeit · Angehörige</span>
+        </div>
+      </div>
+      <!-- Tageskontor: Stolz + Aktivität → kooperative Heimdynamik -->
+      <div style="background:var(--glass-bg);border:1px solid rgba(224,224,224,0.25);border-top:3px solid #5B7290;border-radius:12px;padding:1.1rem 1.25rem;">
+        <div class="card-emoji" style="font-size:1.4rem;margin-bottom:0.5rem;">🏛️</div>
+        <div style="font-size:0.82rem;font-weight:700;color:var(--text);margin-bottom:0.35rem;">Tageskontor</div>
+        <div style="font-size:0.76rem;color:var(--text);line-height:1.55;">Struktur, Mahlzeiten, Aktivierung — der Alltag als Therapie. <strong>Stolz und Aktivität</strong>, die im Tageskontor entstehen, stärken die kooperative Dynamik zu Hause: Wer tagsüber Teilhabe erlebt, bringt abends mehr mit.</div>
+      </div>
+    </div>
+
+    <!-- Dreifacher Mehrwert Summary -->
+    <div style="background:var(--glass-bg);border:1px solid rgba(224,224,224,0.25);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.25rem;">
+      <p style="font-size:0.68rem;font-weight:700;color:var(--petrol);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.7rem;">Dreifacher Mehrwert der Tagesresidenz</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0.6rem;">
+        <div style="display:flex;align-items:flex-start;gap:0.5rem;">
+          <span style="font-size:1rem;flex-shrink:0;">🧭</span>
+          <div>
+            <div style="font-size:0.72rem;font-weight:700;color:var(--text);">Autonomie · Gast</div>
+            <div style="font-size:0.68rem;color:var(--text);line-height:1.45;">Eigene Entscheidungen, eigener Rhythmus — Würde bleibt gewahrt.</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:0.5rem;">
+          <span style="font-size:1rem;flex-shrink:0;">🛡️</span>
+          <div>
+            <div style="font-size:0.72rem;font-weight:700;color:var(--text);">Gewissheit · Angehörige</div>
+            <div style="font-size:0.68rem;color:var(--text);line-height:1.45;">Sicherheit im Alltag — ohne schlechtes Gewissen loslassen.</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:0.5rem;">
+          <span style="font-size:1rem;flex-shrink:0;">💛</span>
+          <div>
+            <div style="font-size:0.72rem;font-weight:700;color:var(--text);">Beziehungs-Reset · Beide</div>
+            <div style="font-size:0.68rem;color:var(--text);line-height:1.45;">Abstand schafft Nähe. Qualitätszeit ersetzt Pflege-Last — die Beziehung atmet wieder.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leistungs-Sync §41 SGB XI -->
+    <div style="background:rgba(91,114,144,0.18);border:1.5px solid #5B7290;border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem;">
+      <p style="font-size:0.72rem;font-weight:700;color:var(--petrol);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem;">§41 SGB XI · Monatliches Budget Tagesresidenz (ab 01.01.2025)</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:0.5rem;text-align:center;">
+        <div style="background:var(--glass-bg);border-radius:8px;padding:0.6rem 0.5rem;">
+          <div style="font-size:0.6rem;font-weight:700;color:var(--text);text-transform:uppercase;margin-bottom:0.15rem;">PG 2</div>
+          <div style="font-size:1.05rem;font-weight:800;color:#E0E0E0;">721 €</div>
+        </div>
+        <div style="background:var(--glass-bg);border-radius:8px;padding:0.6rem 0.5rem;">
+          <div style="font-size:0.6rem;font-weight:700;color:var(--text);text-transform:uppercase;margin-bottom:0.15rem;">PG 3</div>
+          <div style="font-size:1.05rem;font-weight:800;color:#E0E0E0;">1.357 €</div>
+        </div>
+        <div style="background:var(--glass-bg);border-radius:8px;padding:0.6rem 0.5rem;">
+          <div style="font-size:0.6rem;font-weight:700;color:var(--text);text-transform:uppercase;margin-bottom:0.15rem;">PG 4</div>
+          <div style="font-size:1.05rem;font-weight:800;color:#E0E0E0;">1.685 €</div>
+        </div>
+        <div style="background:var(--glass-bg);border-radius:8px;padding:0.6rem 0.5rem;">
+          <div style="font-size:0.6rem;font-weight:700;color:var(--text);text-transform:uppercase;margin-bottom:0.15rem;">PG 5</div>
+          <div style="font-size:1.05rem;font-weight:800;color:#E0E0E0;">2.085 €</div>
+        </div>
+      </div>
+      <p style="font-size:0.7rem;color:var(--text);margin-top:0.65rem;opacity:0.85;">Zusätzliches Budget — unabhängig von Pflegegeld, Sachleistung und Entlastungsbetrag. Abrechnung direkt über die Pflegekasse. Kombinierbar mit häuslicher Pflege.</p>
+    </div>
+
+    <p style="font-size:0.7rem;color:var(--text);text-align:center;opacity:0.8;">Keine Rechtsberatung. Angaben nach §41 SGB XI (Stand 01.01.2025). Verbindliche Klärung über Pflegekasse oder §7a-Beratung.</p>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════════════ 5 · WÜRDE ═══ -->
+<section id="wuerde">
+  <div class="container">
+    <p class="section-label">Würde &amp; Selbstbestimmung · Pflege-Charta</p>
+    <h2>Würde ist kein Privileg — sie ist ein Recht.</h2>
+    <p class="lead" style="margin-bottom:1.75rem;">Krankheit nimmt vieles. Die Würde eines Menschen nimmt sie nicht. Als pflegende Person sind Sie der Schutzschild für dieses Recht — jeden Tag, in jeder Handlung.</p>
+
+    <!-- SVG Würde-Schild — zentrales Symbol der Pflege-Charta -->
+    <div class="wuerde-schild">
+      <svg width="84" height="84" viewBox="0 0 84 84" fill="none" xmlns="http://www.w3.org/2000/svg" title="Würde-Schild — Symbol der Pflege-Charta" role="img" aria-label="Würde-Schild">
+        <defs>
+          <linearGradient id="schild-grad" x1="10" y1="6" x2="74" y2="78" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#A8BEDD"/>
+            <stop offset="100%" stop-color="#5B7290"/>
+          </linearGradient>
+        </defs>
+        <!-- Shield shape -->
+        <path d="M42 6 L72 18 L72 42 C72 60 58 73 42 78 C26 73 12 60 12 42 L12 18 Z"
+              fill="url(#schild-grad)" stroke="#E0E0E0" stroke-width="2.5"/>
+        <!-- Inner heart / care symbol -->
+        <path d="M42 56 C42 56 28 47 28 38 C28 33 31.5 30 35 30 C38 30 40.5 31.5 42 34 C43.5 31.5 46 30 49 30 C52.5 30 56 33 56 38 C56 47 42 56 42 56 Z"
+              fill="#E0E0E0" opacity="0.85"/>
+      </svg>
+    </div>
+
+    <div class="wuerde-quote">
+      <p>„Jeder hilfe- und pflegebedürftige Mensch hat das Recht auf Hilfe zur Selbsthilfe sowie auf Unterstützung, um ein möglichst selbstbestimmtes und selbstständiges Leben führen zu können."</p>
+      <cite>— Artikel 1 der Pflege-Charta (BMFSFJ 2006/2020)</cite>
+    </div>
+
+    <div class="wuerde-grid">
+      <div class="wuerde-card">
+        <div class="wuerde-icon">🤲</div>
+        <h3>Was er noch kann, gehört ihm</h3>
+        <p>Gute Pflege fragt zuerst: Was kann dieser Mensch noch selbst? Seine verbliebenen Fähigkeiten sind sein letztes Stück Freiheit. Schützen Sie sie.</p>
+      </div>
+      <div class="wuerde-card">
+        <div class="wuerde-icon">🛡️</div>
+        <h3>Kein Eingriff ohne Zustimmung</h3>
+        <p>Fixierungen, Bettgitter, Medikamente gegen den Willen — das ist keine Pflege. Das ist ein Eingriff in Persönlichkeitsrechte, der juristisch genehmigt werden muss.</p>
+      </div>
+      <div class="wuerde-card">
+        <div class="wuerde-icon">🏠</div>
+        <h3>Zuhause bleibt Zuhause</h3>
+        <p>Sein Zimmer, seine Gegenstände, sein Rhythmus. Auch im Pflegeheim hat ein Mensch das Recht auf seinen eigenen Lebensraum — das ist Gesetz, nicht Kulanz.</p>
+      </div>
+      <div class="wuerde-card">
+        <div class="wuerde-icon">🌿</div>
+        <h3>Bis zuletzt begleitet</h3>
+        <p>Jeder Mensch hat das Recht auf Schmerzfreiheit und auf vertraute Gesichter am Ende seines Lebens. Die Patientenverfügung sichert diesen Willen rechtlich ab.</p>
+      </div>
+    </div>
+
+    <div class="glass" style="padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;border-left:3px solid var(--petrol);">
+      <div>
+        <p style="font-weight:700;color:var(--text);">Sie sind der Schutzschild. Kennen Sie Ihre Rechte.</p>
+        <p style="font-size:0.825rem;color:var(--text);">Die Charta gibt Ihnen die Worte, wenn Ihnen die Worte fehlen.</p>
+      </div>
+      <a href="#ethik" class="btn btn-ghost">Als Anwalt einlesen →</a>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════════════ 6 · ETHIK — Pflege-Charta ═══ -->
+<section id="ethik">
+  <div class="container">
+
+    <div style="background:rgba(19,27,39,0.55);border:1px solid rgba(224,224,224,0.25);border-radius:14px;padding:1.5rem 1.75rem;margin-bottom:1.5rem;">
+      <p class="section-label" style="color:#E0E0E0;">Ethik &amp; Charta · BMFSFJ 2020</p>
+      <h2 style="margin-bottom:0.75rem;">Die 8 Grundrechte in der Pflege.</h2>
+      <p class="lead">Die Pflege-Charta definiert unveräußerliche Rechte — verbindlich für alle, die pflegen. Karte antippen für den vollständigen Artikel.</p>
+    </div>
+
+    <!-- Advocacy-Framing: Pflegekraft als Anwalt und Sprachrohr -->
+    <div style="background:var(--glass-bg);border:1.5px solid rgba(224,224,224,0.25);border-left:4px solid #E0E0E0;border-radius:0 12px 12px 0;padding:1.25rem 1.5rem;margin-bottom:2rem;">
+      <p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#E0E0E0;margin-bottom:0.5rem;">Ihre Rolle als pflegende Person</p>
+      <p style="font-size:0.975rem;color:var(--text);font-weight:500;line-height:1.6;margin-bottom:0.6rem;">Sie sind nicht nur Helferin oder Helfer. Sie sind <strong>Anwalt</strong> — für einen Menschen, der seine Rechte vielleicht nicht mehr selbst einfordern kann. Sie sind sein <strong>Sprachrohr</strong>, wenn seine Stimme leiser wird.</p>
+      <p style="font-size:0.855rem;color:var(--text);line-height:1.6;">Diese acht Artikel sind kein abstraktes Dokument. Sie sind Ihr Werkzeug. Kennen Sie sie — damit Sie wissen, wann Sie Nein sagen dürfen. Und müssen.</p>
+    </div>
+
+    <div class="charta-grid" id="charta-grid">
+
+      <div class="charta-card" onclick="toggleCharta(this)">
+        <div class="art-num">Art. 1</div>
+        <h3>Selbstbestimmung &amp; Hilfe zur Selbsthilfe</h3>
+        <p class="art-short">Recht auf individuelle Unterstützung zur Erhaltung der Selbstständigkeit und Teilhabe am Leben.</p>
+        <div class="art-detail">
+          <p class="art-quote">„Jeder hilfe- und pflegebedürftige Mensch hat das Recht auf Hilfe zur Selbsthilfe sowie auf Unterstützung, um ein möglichst selbstbestimmtes und selbstständiges Leben führen zu können."</p>
+          <p style="margin-top:0.6rem;">Praktisch: Keine Übernahme von Aufgaben, die Betroffene noch selbst ausführen können. Ressourcenorientierte Pflege (§ 5 SGB XI). Biografiearbeit als Grundlage.</p>
+        </div>
+      </div>
+
+      <div class="charta-card" onclick="toggleCharta(this)">
+        <div class="art-num">Art. 2</div>
+        <h3>Körperliche &amp; psychische Unversehrtheit</h3>
+        <p class="art-short">Schutz vor Gewalt, Vernachlässigung und Misshandlung in jeder Form.</p>
+        <div class="art-detail">
+          <p class="art-quote">„Jeder hilfe- und pflegebedürftige Mensch hat das Recht auf Schutz vor Vernachlässigung, Misshandlung und Gewalt, unabhängig davon, ob diese körperlicher, seelischer, sexueller oder finanzieller Art sind."</p>
+          <p style="margin-top:0.6rem;">Freiheitsentziehende Maßnahmen (Bettgitter, Fixierung) nur mit richterlicher Genehmigung (§ 1906 BGB). Meldepflicht bei Verdacht auf Misshandlung.</p>
+        </div>
+      </div>
+
+      <div class="charta-card" onclick="toggleCharta(this)">
+        <div class="art-num">Art. 3</div>
+        <h3>Privatheit</h3>
+        <p class="art-short">Wahrung der persönlichen Privat- und Intimsphäre — auch in Einrichtungen.</p>
+        <div class="art-detail">
+          <p class="art-quote">„Jeder hilfe- und pflegebedürftige Mensch hat das Recht auf Privatheit. Pflegerische Handlungen sind mit größtmöglicher Diskretion durchzuführen."</p>
+          <p style="margin-top:0.6rem;">Datenschutz-Grundlage: DSGVO Art. 9 (besondere Gesundheitsdaten). Recht auf unbeobachtete Korrespondenz, Besuchsempfang und persönliche Gespräche.</p>
+        </div>
+      </div>
+
+      <div class="charta-card" onclick="toggleCharta(this)">
+        <div class="art-num">Art. 4</div>
+        <h3>Wohnen &amp; Lebensraumgestaltung</h3>
+        <p class="art-short">Recht auf Mitgestaltung des Lebensraums nach eigenen Wünschen und Bedürfnissen.</p>
+        <div class="art-detail">
+          <p class="art-quote">„Jeder hilfe- und pflegebedürftige Mensch hat das Recht, seinen Lebensraum nach eigenen Bedürfnissen und Wünschen gestalten zu können."</p>
+          <p style="margin-top:0.6rem;">Relevant bei Heimeinzug: Mitbringen persönlicher Gegenstände, Zimmergestaltung, Haustiere (wenn möglich). Kein Heimeinzug gegen den Willen bei vorhandener Einwilligungsfähigkeit.</p>
+        </div>
+      </div>
+
+      <div class="charta-card" onclick="toggleCharta(this)">
+        <div class="art-num">Art. 5</div>
+        <h3>Kommunikation &amp; Teilhabe</h3>
+        <p class="art-short">Recht auf Information, Beratung und gesellschaftliche Teilhabe — auch bei kognitiven Einschränkungen.</p>
+        <div class="art-detail">
+          <p class="art-quote">„Jeder hilfe- und pflegebedürftige Mensch hat das Recht auf umfassende Information und Beratung über Möglichkeiten der Unterstützung."</p>
+          <p style="margin-top:0.6rem;">Beratungsanspruch nach § 7a SGB XI (Pflegeberatung durch Pflegekasse). Barrierefreie Kommunikation bei Sprachproblemen oder Demenz.</p>
+        </div>
+      </div>
+
+      <div class="charta-card" onclick="toggleCharta(this)">
+        <div class="art-num">Art. 6</div>
+        <h3>Religion, Kultur &amp; Weltanschauung</h3>
+        <p class="art-short">Recht auf Ausübung religiöser und kultureller Überzeugungen auch in der Pflege.</p>
+        <div class="art-detail">
+          <p class="art-quote">„Jeder hilfe- und pflegebedürftige Mensch hat das Recht, entsprechend seiner Zugehörigkeit zu einer Religionsgemeinschaft oder Weltanschauungsgruppe betreut zu werden."</p>
+          <p style="margin-top:0.6rem;">Speisepläne nach religiösen Vorschriften (halal, kosher, vegan). Seelsorge und religiöse Begleitung sicherstellen. Interkulturelle Sensibilität in der Pflege.</p>
+        </div>
+      </div>
+
+      <div class="charta-card" onclick="toggleCharta(this)">
+        <div class="art-num">Art. 7</div>
+        <h3>Palliative Begleitung &amp; Sterben</h3>
+        <p class="art-short">Recht auf würdevolles Sterben, Schmerzfreiheit und Begleitung bis zuletzt.</p>
+        <div class="art-detail">
+          <p class="art-quote">„Jeder hilfe- und pflegebedürftige Mensch hat das Recht, in Würde zu sterben. Dazu gehören die Befreiung von Schmerzen und die Begleitung durch nahestehende Menschen."</p>
+          <p style="margin-top:0.6rem;">Patientenverfügung (§ 1901a BGB) ist rechtlich verbindlich. SAPV-Anspruch (§ 37b SGB V). Hospizbewegung: Würde geht vor Lebensverlängerung.</p>
+        </div>
+      </div>
+
+      <div class="charta-card" onclick="toggleCharta(this)">
+        <div class="art-num">Art. 8</div>
+        <h3>Rehabilitation &amp; Qualitätssicherung</h3>
+        <p class="art-short">Recht auf Rehabilitation und qualitätsgesicherte Pflege nach wissenschaftlichen Standards.</p>
+        <div class="art-detail">
+          <p class="art-quote">„Jeder hilfe- und pflegebedürftige Mensch hat das Recht auf qualitätsgesicherte Pflege und Betreuung sowie auf Rehabilitation zur Erhaltung oder Wiederherstellung von Fähigkeiten."</p>
+          <p style="margin-top:0.6rem;">Grundsatz §5 SGB XI: Rehabilitation vor Pflege. MDK-Qualitätsprüfungen, DNQP-Expertenstandards, Transparenzberichte. Recht auf Beschwerde beim Heimträger und bei Behörden.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="glass" style="padding:1.25rem 1.5rem;border-left:3px solid #E0E0E0;background:rgba(168,190,221,0.08);">
+      <p style="font-size:0.975rem;color:var(--text);font-weight:600;margin-bottom:0.4rem;">„Würde des Menschen ist unantastbar."</p>
+      <p style="font-size:0.855rem;color:var(--text);font-style:italic;margin-bottom:0.75rem;">Art. 1 Grundgesetz · Gilt ohne Einschränkung auch im Pflegezimmer, im Pflegeheim, in jedem Moment der Pflege.</p>
+      <p style="font-size:0.78rem;color:var(--text);margin-bottom:0.75rem;">Quelle: Charta der Rechte hilfe- und pflegebedürftiger Menschen · BMFSFJ 2006/2020 · Volltext unter <strong>pflege-charta.de</strong></p>
+      <a href="#download" class="btn btn-ghost" style="font-size:0.875rem;">Als Anwalt informiert bleiben → Adea</a>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════════════ KONTAKT ═══ -->
+<section id="kontakt">
+  <div class="container" style="max-width:780px;">
+    <p class="section-label">Hilfe-Netzwerk</p>
+    <h2>Der nächste Schritt — Jetzt Hilfe holen.</h2>
+
+    <!-- Daten-Checkliste (direkt vor Telefonnummern) -->
+    <div class="checklist-prep">
+      <p class="checklist-title">✅ Bereit für das Gespräch?</p>
+      <ul class="checklist-items">
+        <li>Name der pflegebedürftigen Person</li>
+        <li>Versichertennummer (Kranken-/Pflegekasse)</li>
+        <li>Bestehender Pflegegrad (falls vorhanden)</li>
+        <li>Kurze Situationsbeschreibung (Hauptprobleme in 2–3 Sätzen)</li>
+      </ul>
+    </div>
+
+    <!-- Primäre Kontakt-Kacheln -->
+    <div class="contact-grid">
+      <div class="contact-card contact-card--primary">
+        <div class="contact-icon">📞</div>
+        <div class="contact-label">Pflegetelefon · §7a SGB XI</div>
+        <a href="tel:030201791​31" class="contact-number">030 20 17 91-31</a>
+        <div class="contact-desc">Kostenlose Pflegeberatung · Mo–Do 8–18 Uhr · Fr 8–12 Uhr</div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon">🏠</div>
+        <div class="contact-label">Pflegestützpunkt vor Ort</div>
+        <div class="contact-number contact-number--muted">Standortsuche → Pflegekasse</div>
+        <div class="contact-desc">Unabhängige Beratung in Ihrer Gemeinde — kostenlos und neutral</div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon">🏥</div>
+        <div class="contact-label">Ihre Pflegekasse</div>
+        <div class="contact-number contact-number--muted">Nummer auf der Versichertenkarte</div>
+        <div class="contact-desc">Direkte Antragstellung, Leistungsberatung, Pflegegutachten-Termin</div>
+      </div>
+      <div class="contact-card contact-card--alt">
+        <div class="contact-icon">🔵</div>
+        <div class="contact-label">Privat Versicherte · Compass PKV</div>
+        <a href="tel:08002669900" class="contact-number">0800 266 99 00</a>
+        <div class="contact-desc">Kostenlose Pflegeberatung für PKV-Versicherte · täglich 8–20 Uhr</div>
+      </div>
+    </div>
+
+    <!-- Selbsthilfe-Hub -->
+    <p class="sub-section-label" style="margin-top:2rem;">Selbsthilfe &amp; Gemeinschaft</p>
+    <div class="contact-grid">
+      <div class="contact-card">
+        <div class="contact-icon">🤝</div>
+        <div class="contact-label">Kontaktbüro Pflegeselbsthilfe</div>
+        <a href="tel:052196406700" class="contact-number">0521 9640670</a>
+        <div class="contact-desc">Selbsthilfegruppen für Pflegende · Bielefeld</div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon">🧠</div>
+        <div class="contact-label">Alzheimer Gesellschaft Bielefeld</div>
+        <a href="tel:017655869167" class="contact-number">0176 55869167</a>
+        <div class="contact-desc">Beratung, Begleitung und Angehörigengruppen bei Demenz</div>
+      </div>
+    </div>
+
+    <!-- Young Carers -->
+    <p class="sub-section-label" style="margin-top:1.5rem;">Young Carers</p>
+    <div class="contact-grid">
+      <div class="contact-card">
+        <div class="contact-icon">🧒</div>
+        <div class="contact-label">Kinderschutzbund · Junge Pflegende</div>
+        <a href="tel:015737556031" class="contact-number">01573 7556031</a>
+        <div class="contact-desc">Unterstützung für Kinder und Jugendliche, die zuhause mitpflegen</div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon">💻</div>
+        <div class="contact-label">Pausentaste · Anonyme Onlineberatung</div>
+        <a href="https://www.pausentaste.de" target="_blank" rel="noopener" class="contact-number" style="font-size:0.9rem;">pausentaste.de</a>
+        <div class="contact-desc">Anonyme Online-Beratung für pflegende Angehörige · 24/7 erreichbar</div>
+      </div>
+    </div>
+
+    <!-- Behörden & BMG -->
+    <p class="sub-section-label" style="margin-top:1.5rem;">Behörden &amp; Offizielle Stellen</p>
+    <div class="contact-grid">
+      <div class="contact-card">
+        <div class="contact-icon">🏛️</div>
+        <div class="contact-label">BMG · Bürgertelefon Pflegeversicherung</div>
+        <a href="tel:030340606602" class="contact-number">030 3 40 60 66-02</a>
+        <div class="contact-desc">Bundesgesundheitsministerium · Mo–Do 8–18 Uhr · Fr 8–12 Uhr</div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon">🦻</div>
+        <div class="contact-label">Gehörlosen-Bildtelefon BMG</div>
+        <div class="contact-number contact-number--muted">Videotelefon via BMG-Website</div>
+        <div class="contact-desc">Barrierefreie Beratung für gehörlose und schwerhörige Menschen</div>
+      </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <p style="margin-top:1.5rem;font-size:0.72rem;color:var(--text);text-align:center;opacity:0.85;border-top:1px solid rgba(224,224,224,0.2);padding-top:1rem;">
+      Keine Rechtsberatung. Alle Angaben dienen der Orientierung — rechtsverbindliche Auskunft erhalten Sie über Ihre Pflegekasse oder die kostenfreie Beratung nach §7a SGB XI.
+    </p>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════════════ DOWNLOAD ═══ -->
+<section id="download">
+  <div class="container">
+    <p class="section-label">Release</p>
+    <h2>Adea — Demnächst verfügbar.</h2>
+    <p class="lead" style="margin-bottom:1.5rem;">Die App befindet sich in der Abschlussphase. Beta-Tester erhalten frühzeitigen Zugang zum Direkt-Abo.</p>
+    <div class="coming-soon" style="max-width:480px;margin:0 auto 1rem;">
+      <div class="coming-soon-label">🔒 &nbsp;Zwei Lösungen · In Vorbereitung</div>
+      <div class="coming-soon-text">Adea &amp; Care Diary:<br/>In Vorbereitung.</div>
+      <div class="coming-soon-sub">Sicherheit, die mitdenkt. Release Sommer 2026.</div>
+    </div>
+    <p style="font-size:0.875rem;color:var(--text);text-align:center;">
+      Beta-Zugang anfragen: <a href="mailto:r.krieg.home@gmail.com" style="color:var(--petrol);font-weight:600;">r.krieg.home@gmail.com</a>
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ FAQ ═══ -->
+<div class="section-divider"></div>
+<section id="faq">
+  <div class="container" style="max-width:720px;">
+    <p class="section-label">FAQ</p>
+    <h2>Antworten auf Ihre wichtigsten Fragen.</h2>
+
+    <details class="faq-item">
+      <summary>Wie oft kann ich Wohnraumanpassung nach §40 SGB XI beantragen?</summary>
+      <div class="faq-answer">
+        Bis zu <strong>4.180 € je Maßnahme</strong> — und das ist nicht auf einmal begrenzt.
+        Bei einer <em>wesentlichen Änderung der Pflegesituation</em> (z. B. neuer Pflegegrad,
+        anderes Umfeld oder andere Wohnung) können Sie erneut eine Förderung beantragen.
+        Leben mehrere Pflegebedürftige im Haushalt, erhalten alle Anspruchsberechtigten
+        den vollen Betrag — bis zu <strong>16.720 € gemeinsam</strong>.
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Welche Leistungen stehen mir bei Pflegegrad 1 zu?</summary>
+      <div class="faq-answer">
+        Auch Pflegegrad 1 sichert bereits konkrete Leistungen:
+        <strong>131 € Entlastungsbetrag</strong> monatlich (§45b SGB XI) für Entlastungsangebote,
+        <strong>42 € Verbrauchsmaterialien</strong> monatlich (§40 SGB XI) für Pflegehilfsmittel
+        wie die Pflegebox, sowie <strong>4.180 € Wohnraumanpassung</strong> (§40 SGB XI)
+        einmalig je Maßnahme. Pflegegeld und Sachleistungen setzen erst ab PG 2 ein.
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Wann muss ich Hilfsmittel beantragen — vor oder nach dem Kauf?</summary>
+      <div class="faq-answer">
+        <strong>Immer vor der Beschaffung.</strong> Die Pflegekasse hat einen
+        Genehmigungsvorbehalt: Kaufen oder mieten Sie ein Pflegehilfsmittel ohne vorherige
+        Genehmigung, besteht kein Erstattungsanspruch. Ausnahme: Verbrauchsmaterialien
+        über die monatliche Pflegebox (42 €) werden ohne Einzelgenehmigung
+        direkt abgerechnet — hier genügt die einmalige Verordnung.
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Wie funktioniert die 42 €-Hilfsmittelpauschale genau?</summary>
+      <div class="faq-answer">
+        Der monatliche Anspruch von <strong>42 € nach §40 Abs. 2 SGB XI</strong>
+        lässt sich auf zwei Wegen nutzen:<br><br>
+        <strong>Pflegebox (Abo):</strong> Ein Pflegebox-Anbieter liefert monatlich
+        zugelassene Verbrauchsmaterialien (Handschuhe, Bettschutz etc.) direkt nach Hause —
+        vollständig von der Kasse bezahlt, ohne Eigenanteil.<br><br>
+        <strong>Rechnungserstattung:</strong> Sie kaufen selbst und reichen die Quittung
+        bei der Pflegekasse ein — Erstattung bis 42 €. Zuzahlungen sind auf
+        <strong>max. 25 € pro Quartal</strong> gedeckelt.
+        Nicht verwendete Beträge verfallen monatlich — keine Ansammlung möglich.
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Kann ich §40 SGB XI (Wohnraumanpassung) mit KfW-Förderung kombinieren?</summary>
+      <div class="faq-answer">
+        Grundsätzlich <strong>ja</strong> — Doppelförderung desselben Vorhabens ist jedoch
+        ausgeschlossen. Kombinieren bedeutet: §40-Mittel für eine Maßnahme,
+        KfW-Kredit (Programm 159 „Altersgerecht Umbauen") für eine andere.
+        Achten Sie darauf, dass jede Maßnahme klar abgegrenzt ist und die
+        Kasse §40 nicht rückwirkend kürzt, wenn eine KfW-Förderung für
+        dieselbe Baumaßnahme bewilligt wurde. Lassen Sie sich im Zweifelsfall
+        durch die kostenfreie Pflegeberatung nach §7a SGB XI beraten.
+      </div>
+    </details>
+
+    <div class="faq-leitmotiv">
+      <strong>„Hilfe annehmen ist Stärke."</strong>
+      Wer frühzeitig Unterstützung organisiert, schützt sich selbst — und die Menschen,
+      die er pflegt. Informieren, beantragen, entlasten.
+    </div>
+
+    <p style="margin-top:1rem;font-size:0.72rem;color:var(--text);text-align:center;opacity:0.85;">
+      Alle Angaben dienen der Orientierung und stellen keine Rechtsberatung dar.
+      Maßgeblich sind die individuellen Bescheide Ihrer Pflegekasse sowie die
+      kostenfreie Beratung nach §7a SGB XI.
+    </p>
+  </div>
+</section>
+
+<!-- Affiliate Resource-Sidebar (v3.3) — sticky, Grid-Spalte 2, kein Content-Overlap durch Grid-Reservierung -->
+<aside class="resource-sidebar" aria-label="Empfohlene Ressourcen (Anzeige, Platzhalter)" aria-describedby="affiliate-disclaimer">
+  <div class="resource-sidebar-label">Empfohlene Ressourcen<br><a href="#affiliate-disclaimer">Affiliate-Hinweis</a></div>
+
+  <!-- 300x600 (Half Page) -->
+  <div class="portrait-ad-slot ad-half-page" role="complementary" aria-label="Anzeige: Empfohlene Ressourcen, Platzhalter, max. 300x600 px">
+    <div>
+      <div class="ad-size-label">Max. 300x600 px</div>
+      <div class="native-ad-placeholder">Platzhalter</div>
+    </div>
+  </div>
+  <!-- 160x600 (Wide Skyscraper) — nur bei sehr hohen Viewports zusätzlich sichtbar -->
+  <div class="portrait-ad-slot ad-wide-skyscraper" role="complementary" aria-label="Anzeige: Empfohlene Ressourcen, Platzhalter, max. 160x600 px">
+    <div>
+      <div class="ad-size-label">Max. 160x600 px</div>
+      <div class="native-ad-placeholder">Platzhalter</div>
+    </div>
+  </div>
+</aside>
+
+</div><!-- /.content-with-sidebar -->
+
+<!-- ═══════════════════════════════════════ FOOTER ═══ -->
+<footer>
+  <div class="footer-claim">CareInsight — die Seite die Hilft</div>
+  <p style="font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#5B7290;margin-bottom:0.5rem;">🧪 Development Preview — Zahlungsabwicklung noch nicht live</p>
+  <p>© 2026 IRIS Digital · René Krieg &nbsp;·&nbsp;
+     <a href="mailto:r.krieg.home@gmail.com">r.krieg.home@gmail.com</a>
+  </p>
+  <p style="margin-top:0.4rem;">CareInsight — Der Blick hinter die Pflege &nbsp;·&nbsp; Sicherheit, die mitdenkt.</p>
+  <p style="margin-top:0.3rem;font-size:0.78rem;color:#E0E0E0;">IRIS Digital — Complexity Simplify</p>
+  <p style="margin-top:0.2rem;font-size:0.78rem;"><a href="https://www.careinsight.de" style="color:#E0E0E0;">www.careinsight.de</a></p>
+
+  <p style="margin-top:0.4rem;font-size:0.78rem;color:#E0E0E0;">IRIS Digital ist Inhaber und Entwickler von CareInsight, Adea und Care Diary. Wir produzieren ausschließlich für unser eigenes Ökosystem.</p>
+
+  <div class="footer-impressum">
+    <strong>Impressum</strong> — Angaben gemäß § 5 TMG:<br>
+    <div style="display:flex;align-items:center;justify-content:center;gap:0.6rem;margin:0.4rem 0;">
+      <!-- Bronze-Farbwerte 1:1 aus iris-web/index.html übernommen (GLOBAL_SOURCE_OF_TRUTH_MANDATE
+           — vorherige Mint/Lime-Version war eine veraltete Sekundärquelle, nie das echte IRIS-Digital-Logo) -->
+      <svg class="iris-logo" width="26" height="26" viewBox="0 0 28 28" role="img" aria-label="IRIS Digital Logo — Kamera-Iris-Blende in Bronze, ohne eigenen Hintergrund">
+        <defs>
+          <linearGradient id="irisMetal" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#6B4423"/><stop offset="16%" stop-color="#B87333"/>
+            <stop offset="34%" stop-color="#6B4423"/><stop offset="50%" stop-color="#E8C39E"/>
+            <stop offset="64%" stop-color="#B87333"/><stop offset="82%" stop-color="#6B4423"/>
+            <stop offset="100%" stop-color="#E8C39E"/>
+          </linearGradient>
+        </defs>
+        <g fill="url(#irisMetal)">
+          <rect x="13" y="2.5" width="2" height="9" rx="1" transform="rotate(0 14 14)"/>
+          <rect x="13" y="2.5" width="2" height="9" rx="1" transform="rotate(60 14 14)"/>
+          <rect x="13" y="2.5" width="2" height="9" rx="1" transform="rotate(120 14 14)"/>
+          <rect x="13" y="2.5" width="2" height="9" rx="1" transform="rotate(180 14 14)"/>
+          <rect x="13" y="2.5" width="2" height="9" rx="1" transform="rotate(240 14 14)"/>
+          <rect x="13" y="2.5" width="2" height="9" rx="1" transform="rotate(300 14 14)"/>
+        </g>
+        <circle cx="14" cy="14" r="3.2" fill="#E8C39E"/>
+      </svg>
+      <div style="text-align:left;">
+        <div class="iris-wordmark" style="color:#FFFFFF;font-size:0.85rem;line-height:1.2;">IRIS Digital</div>
+        <div style="font-style:italic;font-size:0.72rem;color:rgba(255,255,255,0.72);line-height:1.2;">Complexity Simplified</div>
+      </div>
+    </div>
+    Inhaber: René Krieg<br>
+    Produktfamilie:
+    <span style="display:inline-flex;align-items:center;gap:0.25rem;vertical-align:middle;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#A8BEDD" stroke-width="2" aria-hidden="true"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5l8-3z"/></svg>
+      Adea
+    </span>
+    ·
+    <span style="display:inline-flex;align-items:center;gap:0.25rem;vertical-align:middle;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#A8BEDD" stroke-width="2" aria-hidden="true"><path d="M4 4.5C4 3.7 4.7 3 5.5 3H19a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H5.5c-.8 0-1.5-.7-1.5-1.5zM4 17.5C4 16.7 4.7 16 5.5 16H20"/></svg>
+      Care Diary
+    </span><br>
+    Hohenfelsstraße 34, 35232 Dautphetal<br>
+    Kleingewerbe gemäß § 19 UStG — Umsatzsteuer wird nicht ausgewiesen.<br>
+    <a href="mailto:r.krieg.home@gmail.com">r.krieg.home@gmail.com</a><br>
+    <br>
+    <strong>Medizinischer Hinweis:</strong> Diese Webseite bietet keine medizinische Diagnose oder Beratung. Inhalte dienen der allgemeinen Information und ersetzen keinen Arzt- oder Therapeutenbesuch.<br>
+    <br>
+    <strong>Datenschutz</strong> — Grundlage: DSGVO Art. 9 (besondere Kategorien personenbezogener Daten · Gesundheitsdaten).<br>
+    Diese Webseite erhebt keine personenbezogenen Daten und keine Cookies. Alle Berechnungen (z.&nbsp;B. ZBI-22-Belastungstest, Pflegegrad-Rechner) erfolgen ausschließlich lokal in Ihrem Browser — Ihre Eingaben und Testantworten verlassen Ihr Gerät nie. Erfasst werden ausschließlich anonymisierte, aggregierte Nutzungsstatistiken (z.&nbsp;B. besuchte Seitenbereiche, Verweildauer, Klick-Zähler) zur internen Produktverbesserung — kein Personenbezug, keine Inhalte, kein Drittanbieter-Tool. Für die Cloud-Synchronisation in der Adea App gilt zusätzlich eine Zero-Knowledge-Architektur mit AES-256-GCM-Verschlüsselung.<br>
+    Kontakt &amp; Auskunft: <a href="mailto:r.krieg.home@gmail.com">r.krieg.home@gmail.com</a><br>
+    <br>
+    <em>Diese Informationen dienen der allgemeinen Orientierung und ersetzen keine Rechts- oder Sozialberatung.
+    Rechtsverbindliche Auskünfte erhalten Sie kostenlos über die
+    <strong>Pflegeberatung nach § 7a SGB XI</strong> Ihrer Pflegekasse.</em>
+    <br><br>
+    <span id="affiliate-disclaimer" style="color:#E0E0E0;"><strong>Affiliate-Hinweis:</strong> Als Anzeige gekennzeichnete Inhalte (Platzhalter) können künftig Affiliate-Links enthalten. CareInsight erhält in diesem Fall ggf. eine Provision, ohne dass für Sie Mehrkosten entstehen. Die redaktionelle Unabhängigkeit bleibt gewahrt — Fachinhalte werden dadurch nicht beeinflusst.</span>
+  </div>
+</footer>
+
+<!-- Back-to-Top Button -->
+<button id="back-to-top" aria-label="Zurück nach oben">↑</button>
+
+<!-- ═══════════════════════════════════════ JS ═══ -->
+<script>
+/* ── SCROLL-RESET (v4.34) — kein boot()-Aufruf im Code vorhanden, daher an window.onload gebunden ── */
+if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; }
+window.addEventListener('load', function() { window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); });
+
+/* ── MOBILE-NAV-TOGGLE — behebt fehlende Navigation unter 900px (Nav-Links waren zuvor komplett display:none ohne Ersatz) ── */
+(function initNavToggle() {
+  const btn = document.getElementById('nav-toggle');
+  const nav = document.getElementById('site-nav');
+  if (!btn || !nav) return;
+  btn.addEventListener('click', () => {
+    const open = nav.classList.toggle('nav-open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.setAttribute('aria-label', open ? 'Menü schließen' : 'Menü öffnen');
+  });
+  /* Anker-Klick: Dropdown SOFORT ohne Transition schließen, erst danach zum Ziel scrollen —
+     sonst läuft die 0.25s Collapse-Animation parallel zum Anker-Sprung und verfälscht die
+     Zielposition (Overshoot, da sich die Layout-Höhe während des Scrollens noch ändert). */
+  nav.querySelectorAll('a[href^="#"]').forEach((a) => a.addEventListener('click', (e) => {
+    if (!nav.classList.contains('nav-open')) return;
+    e.preventDefault();
+    const targetId = a.getAttribute('href').slice(1);
+    const target = document.getElementById(targetId);
+    nav.style.transition = 'none';
+    nav.classList.remove('nav-open');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-label', 'Menü öffnen');
+    void nav.offsetHeight; // reflow erzwingen, damit die Transition-Deaktivierung sofort greift
+    nav.style.transition = '';
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }));
+})();
+
+/* ── MASTER-ID LIVE/DEMO-TOGGLE (v67.146, Demo-Gate-Policy) ──
+   Nur für René sichtbar (?master=1 setzt persistentes localStorage-Flag).
+   Steuert real das bestehende ci_dev_mode-Cookie (s. insight-auditor.js
+   detectTestSession) — schließt die eigene Session aus/ein der Analytics. */
+(function initMasterToggle() {
+  if (new URLSearchParams(location.search).get('master') === '1') {
+    localStorage.setItem('lisa_master_id', 'true');
+  }
+  if (localStorage.getItem('lisa_master_id') !== 'true') return;
+  const toggle = document.getElementById('master-live-toggle');
+  const lbl = document.getElementById('master-live-lbl');
+  function isDevMode() { return document.cookie.split(';').some(c => c.trim().startsWith('ci_dev_mode=')); }
+  function render() {
+    const on = isDevMode();
+    toggle.classList.toggle('on', !on); // "Live" = dev-mode AUS
+    lbl.textContent = on ? '⚪ Demo-Modus (Live aus)' : '🟢 Live-Daten AN';
+  }
+  toggle.style.display = 'inline-flex';
+  toggle.addEventListener('click', () => {
+    if (isDevMode()) { document.cookie = 'ci_dev_mode=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/'; }
+    else { document.cookie = 'ci_dev_mode=1; path=/; max-age=31536000'; }
+    render();
+  });
+  render();
+})();
+
+/* ── CHARTA TOGGLE ── */
+/* ── PG-RECHNER (ROUTES.profile + ROUTES.benefits) ── */
+/* ── GELDWERT-HARDLOCK (BMG 2025 · PUEG · §40/§42a/§45b SGB XI) — NICHT ÄNDERN OHNE DIREKTIVE ── */
+const WOHNRAUM_MAX   = 4180; // §40 Abs. 4 SGB XI — je Maßnahme, PUEG +4,5 % ab 01.01.2025
+const HILFSMITTEL    = 42; // §40 Abs. 2 SGB XI — Verbrauchsmaterialien/Monat
+const JAHRESBUDGET   = 3539; // §42a SGB XI — Gem. Jahresbetrag VP+KZP (ab 01.07.2025)
+const ENTLASTUNG     = 131; // §45b SGB XI — Entlastungsbetrag/Monat (1.572 €/Jahr)
+
+const PG_DATA = {
+  1: { pflegegeld: null, sachleistung: null, entlastung: ENTLASTUNG, kombiniert: null,          wohnraum: WOHNRAUM_MAX },
+  2: { pflegegeld: 347,  sachleistung: 796,  entlastung: ENTLASTUNG, kombiniert: JAHRESBUDGET,  wohnraum: WOHNRAUM_MAX },
+  3: { pflegegeld: 599,  sachleistung: 1497, entlastung: ENTLASTUNG, kombiniert: JAHRESBUDGET,  wohnraum: WOHNRAUM_MAX },
+  4: { pflegegeld: 800,  sachleistung: 1859, entlastung: ENTLASTUNG, kombiniert: JAHRESBUDGET,  wohnraum: WOHNRAUM_MAX },
+  5: { pflegegeld: 990,  sachleistung: 2299, entlastung: ENTLASTUNG, kombiniert: JAHRESBUDGET,  wohnraum: WOHNRAUM_MAX }
+};
+
+function fmt(n) { return n.toLocaleString('de-DE'); }
+
+function openFlyerModal() {
+  const modal = document.getElementById('flyer-modal');
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  modal.querySelector('button').focus();
+  window.__ciAuditor?.trackInteraction('Expert-Knowledge-Download', { file: 'infografik-tagesresidenz-flyer-view' });
+}
+function closeFlyerModal() {
+  document.getElementById('flyer-modal').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('infografik-tagesresidenz-img').focus();
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeFlyerModal();
+});
+
+async function downloadInfografik() {
+  window.__ciAuditor?.trackInteraction('Expert-Knowledge-Download', { file: 'infografik-tagesresidenz' });
+  try {
+    const response = await fetch('assets/infografik-tagesresidenz.png');
+    if (!response.ok) throw new Error('Asset nicht verfügbar');
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'Flyer-Wuerdevoller-Alltag-Tagesresidenz.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  } catch(e) {
+    const link = document.createElement('a');
+    link.href = 'assets/infografik-tagesresidenz.png';
+    link.download = 'Flyer-Wuerdevoller-Alltag-Tagesresidenz.png';
+    link.click();
+  }
+}
+
+function selectPG(grade) {
+  document.querySelectorAll('.pg-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('pg-btn-' + grade).classList.add('active');
+
+  const d = PG_DATA[grade];
+  const benefits = [
+    {
+      label: 'Pflegegeld',
+      para: '§37 SGB XI',
+      amount: d.pflegegeld ? fmt(d.pflegegeld) + ' €/Monat' : 'kein Anspruch',
+      note: 'Für häusliche Pflege durch Angehörige · ab PG 2'
+    },
+    {
+      label: 'Sachleistung',
+      para: '§36 SGB XI',
+      amount: d.sachleistung ? fmt(d.sachleistung) + ' €/Monat' : 'kein Anspruch',
+      note: 'Für ambulante Pflegedienste · ab PG 2'
+    },
+    {
+      label: 'Entlastungsbetrag',
+      para: '§45b SGB XI',
+      amount: '131 €/Monat',
+      note: 'Alle Pflegegrade · 1.572 €/Jahr · zweckgebunden'
+    },
+    {
+      label: 'VP + KZP (Jahresbudget)',
+      para: '§42a SGB XI',
+      amount: d.kombiniert ? fmt(d.kombiniert) + ' €/Jahr' : 'kein Anspruch',
+      note: d.kombiniert ? 'Verhinderungspflege + Kurzzeitpflege · frei kombinierbar, kein Sub-Limit je Leistungsart · NEU 01.07.2025' : 'Ab Pflegegrad 2'
+    },
+    {
+      label: 'Wohnraumanpassung',
+      para: '§40 Abs. 4 SGB XI',
+      amount: 'bis ' + fmt(d.wohnraum) + ' €',
+      note: 'Einmaliger Zuschuss pro Maßnahme – erneute Förderung bei wesentlicher Änderung der Pflegesituation möglich.'
+    },
+    {
+      label: 'Hilfsmittel',
+      para: '§40 Abs. 2 SGB XI',
+      amount: 'bis ' + HILFSMITTEL + ' €/Monat',
+      note: 'Verbrauchsmaterialien (Handschuhe, Bettschutz) · alle Pflegegrade'
+    }
+  ];
+
+  document.getElementById('pg-benefits-grid').innerHTML = benefits.map(b => `
+    <div class="pg-card">
+      <div style="font-size:0.65rem;font-weight:700;color:#FFFFFF;text-transform:uppercase;letter-spacing:0.07em;opacity:0.85;margin-bottom:0.3rem;">${b.para}</div>
+      <div style="font-size:1.05rem;font-weight:800;color:#FFFFFF;margin-bottom:0.15rem;">${b.amount}</div>
+      <div style="font-size:0.8rem;font-weight:700;color:#FFFFFF;margin-bottom:0.15rem;">${b.label}</div>
+      <div style="font-size:0.72rem;color:rgba(255,255,255,0.75);line-height:1.4;">${b.note}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('pg-reform-note').innerHTML = grade >= 2
+    ? '<strong>PUEG-Reform 01.07.2025:</strong> Verhinderungspflege §39 (bis 1.685 €) und Kurzzeitpflege §42 (bis 1.854 €) wurden zum <strong>Gemeinsamen Jahresbetrag §42a (3.539 €/Jahr)</strong> zusammengelegt — frei auf beide Leistungsarten verteilbar, kein Übertrag-Verlust. Pflegegeld läuft während VP zu 50 % weiter.'
+    : '<strong>Pflegegrad 1:</strong> Anspruch auf Entlastungsbetrag §45b (131 €/Monat = 1.572 €/Jahr) und Wohnraumanpassung §40 (bis 4.180 €). Pflegegeld und Sachleistung beginnen erst ab Pflegegrad 2.';
+
+  document.getElementById('pg-benefits').style.display = 'block';
+  document.getElementById('pg-placeholder').style.display = 'none';
+  window.__ciAuditor?.track('InteractionEvent', { subtype: 'PG-Rechner', grade });
+}
+
+// Versucht zuerst die echte Stripe-Checkout-Session (careinsight/server/ /api/create-checkout-session).
+// Solange kein Server deployt/kein echter Stripe-Key hinterlegt ist, schlägt der Call fehl —
+// dann ehrlicher Fallback auf die als Testmodus gekennzeichnete Demo-Simulation. Sobald echt live,
+// leitet diese Funktion unverändert zu Stripe weiter, ohne Codeänderung nötig zu machen.
+async function simulateCheckout(product) {
+  const statusEl = document.getElementById('checkout-status-' + product);
+  try {
+    const res = await fetch('/api/create-checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      window.location.href = data.url; // echte Stripe-Weiterleitung
+      return;
+    }
+  } catch (e) {
+    // Server nicht erreichbar (noch nicht deployt) — Demo-Fallback unten.
+  }
+
+  const mockId = 'sub_demo_' + product + '_' + Date.now();
+  localStorage.setItem('ci_subscription_id', mockId);
+  localStorage.setItem('ci_subscription_product', product);
+  statusEl.textContent = '✓ Demo abgeschlossen (Testmodus — keine echte Zahlung)';
+  window.__ciAuditor?.trackSubscriptionEvent('demo_checkout_completed', { product });
+
+  const dl = document.getElementById('download-' + product + '-btn');
+  dl.style.opacity = '1';
+  dl.style.pointerEvents = 'auto';
+  dl.setAttribute('aria-disabled', 'false');
+  dl.href = '#download';
+  dl.onclick = null;
+  dl.textContent = '⬇ App herunterladen';
+}
+
+// PDF-Käufe (Recht & Vorsorge): gleiches Muster wie simulateCheckout(), aber Demo-Freischaltung
+// verlinkt direkt auf die real vorhandene, gebrandete PDF-Datei (kein Mock-Inhalt).
+const LEGAL_DOC_PATHS = {
+  legal_bundle: 'assets/legal/Recht-Vorsorge-Bundle.zip',
+  legal_immobilie: 'assets/legal/Notarielle_Vorbereitung_Immobilien.pdf',
+};
+async function simulateLegalCheckout(product) {
+  const statusEl = document.getElementById('checkout-status-' + product);
+  try {
+    const res = await fetch('/api/create-checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      window.location.href = data.url;
+      return;
+    }
+  } catch (e) { /* Server nicht erreichbar — Demo-Fallback unten */ }
+
+  statusEl.textContent = '✓ Demo abgeschlossen (Testmodus — keine echte Zahlung)';
+  window.__ciAuditor?.trackSubscriptionEvent('demo_checkout_completed', { product });
+  const dl = document.getElementById('download-' + product + '-btn');
+  dl.style.opacity = '1';
+  dl.style.pointerEvents = 'auto';
+  dl.setAttribute('aria-disabled', 'false');
+  dl.href = LEGAL_DOC_PATHS[product];
+  dl.setAttribute('download', '');
+  dl.onclick = null;
+  dl.textContent = product === 'legal_bundle' ? '⬇ Bundle herunterladen' : '⬇ PDF herunterladen';
+}
+
+// Ruft die echte Refund-API auf (careinsight/server/), sofern eine subscriptionId bekannt ist
+// (nur nach echtem Stripe-Checkout gesetzt — existiert aktuell noch nicht, daher Fallback auf reine Info-Anzeige).
+async function toggleWiderruf() {
+  const box = document.getElementById('widerruf-info');
+  const btn = document.querySelector('[aria-controls="widerruf-info"]');
+  const open = box.style.display !== 'none';
+  if (!open) window.__ciAuditor?.track('EngagementEvent', { subtype: 'widerruf_info_opened' });
+
+  const subscriptionId = localStorage.getItem('ci_subscription_id');
+  if (!open && subscriptionId) {
+    try {
+      const res = await fetch('/api/refund', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscriptionId }),
+      });
+      const data = await res.json();
+      box.querySelector('.widerruf-result')?.remove();
+      const result = document.createElement('p');
+      result.className = 'widerruf-result';
+      result.style.cssText = 'margin-top:0.75rem;font-weight:700;color:var(--petrol);';
+      result.textContent = res.ok
+        ? `✓ Widerruf erfolgreich — Rückzahlung ausgelöst (${data.refundId}).`
+        : `Widerruf nicht möglich: ${data.message || data.error}`;
+      box.appendChild(result);
+      // age_cohort bleibt null — die Seite erhebt aktuell kein Alter (kein Input-Feld),
+      // s. GOAL-FINALIZATION-REPORT [OFFEN]. Kein Bucketing ohne echte Datenquelle.
+      if (res.ok) window.__ciAuditor?.trackSubscriptionEvent('refund_requested', { refundId: data.refundId });
+    } catch (e) {
+      // API nicht erreichbar (server/ noch nicht deployt) — reine Info-Anzeige als Fallback.
+    }
+  }
+
+  box.style.display = open ? 'none' : 'block';
+  btn.setAttribute('aria-expanded', String(!open));
+  btn.classList.toggle('on', !open);
+}
+
+function toggleCharta(card) {
+  const isOpen = card.classList.contains('expanded');
+  document.querySelectorAll('.charta-card.expanded').forEach(c => c.classList.remove('expanded'));
+  if (!isOpen) {
+    card.classList.add('expanded');
+    const art = card.querySelector('.art-num')?.textContent || '?';
+    window.__ciAuditor?.track('EngagementEvent', { subtype: 'charta_article_opened', article: art });
+  }
+}
+
+/* ── ZBI-22 ── */
+const ZBI_QUESTIONS = [
+  "Haben Sie das Gefühl, dass Ihr Angehöriger mehr Unterstützung braucht, als er/sie bekommt?",
+  "Haben Sie das Gefühl, dass Sie wegen der Zeit, die Sie mit Ihrem Angehörigen verbringen, zu wenig Zeit für sich selbst haben?",
+  "Fühlen Sie sich gestresst, wenn Sie sowohl für Ihren Angehörigen als auch für andere Familienmitglieder sorgen müssen?",
+  "Sind Sie verlegen über das Verhalten Ihres Angehörigen?",
+  "Werden Sie ärgerlich, wenn Sie bei Ihrem Angehörigen sind?",
+  "Glauben Sie, dass die Situation mit Ihrem Angehörigen Ihre Beziehungen zu anderen Familienmitgliedern oder Freunden beeinträchtigt?",
+  "Haben Sie Angst, was die Zukunft für Ihren Angehörigen bringen wird?",
+  "Haben Sie das Gefühl, dass Ihr Angehöriger von Ihnen abhängig ist?",
+  "Fühlen Sie sich angespannt, wenn Sie mit Ihrem Angehörigen zusammen sind?",
+  "Haben Sie das Gefühl, dass Ihre Gesundheit durch die Fürsorge für Ihren Angehörigen gelitten hat?",
+  "Haben Sie das Gefühl, dass Sie wegen Ihres Angehörigen weniger Privatsphäre haben, als Sie möchten?",
+  "Haben Sie das Gefühl, dass Ihr Sozialleben durch die Fürsorge für Ihren Angehörigen gelitten hat?",
+  "Fühlen Sie sich unwohl, Freunde wegen Ihres Angehörigen einzuladen?",
+  "Haben Sie das Gefühl, dass Ihr Angehöriger erwartet, dass Sie für ihn/sie sorgen, als ob Sie die einzige Person wären, auf die er/sie sich verlassen kann?",
+  "Glauben Sie, dass Sie nicht genug Geld haben, um für Ihren Angehörigen zu sorgen, zusätzlich zu Ihren anderen Ausgaben?",
+  "Haben Sie das Gefühl, dass Sie nicht in der Lage sein werden, noch viel länger für Ihren Angehörigen zu sorgen?",
+  "Haben Sie das Gefühl, dass Sie die Kontrolle über Ihr Leben verloren haben, seit Sie begonnen haben, für Ihren Angehörigen zu sorgen?",
+  "Würden Sie sich wünschen, dass Sie die Pflege Ihres Angehörigen jemand anderem überlassen könnten?",
+  "Fühlen Sie sich unsicher, was Sie mit Ihrem Angehörigen tun sollen?",
+  "Haben Sie das Gefühl, dass Sie mehr für Ihren Angehörigen tun sollten?",
+  "Haben Sie das Gefühl, dass Sie die Pflege Ihres Angehörigen besser machen könnten?",
+  "Insgesamt: Wie stark fühlen Sie sich durch die Betreuung Ihres Angehörigen belastet?"
+];
+const ZBI_LABELS = ['Niemals', 'Selten', 'Manchmal', 'Häufig', 'Fast immer'];
+
+function buildZBI() {
+  const container = document.getElementById('zbi-questions');
+  if (!container) return;
+  container.innerHTML = '';
+  ZBI_QUESTIONS.forEach((q, i) => {
+    const div = document.createElement('div');
+    div.style.cssText = 'padding:1rem 1.25rem;background:var(--glass-bg);border-radius:12px;border:1px solid rgba(224,224,224,0.25);';
+    div.innerHTML = `<div style="font-size:0.875rem;color:#E0E0E0;font-weight:500;margin-bottom:0.75rem;">${i+1}. ${q}</div>
+      <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">${ZBI_LABELS.map((l,v) =>
+        `<label style="flex:1;min-width:44px;text-align:center;cursor:pointer;">
+         <input type="radio" name="zbi_${i}" value="${v}" onchange="updateZBIProgress()" style="display:none;">
+         <span style="display:block;padding:0.4rem 0.2rem;border-radius:8px;border:1px solid rgba(224,224,224,0.25);background:var(--glass-bg);font-size:0.78rem;color:#E0E0E0;transition:all 0.12s;" class="zbi-opt">${v}<br/><small style="font-size:0.62rem;opacity:0.8">${l}</small></span></label>`
+      ).join('')}</div>`;
+    container.appendChild(div);
+  });
+  document.querySelectorAll('input[type=radio][name^=zbi_]').forEach(radio => {
+    radio.addEventListener('change', function() {
+      document.querySelectorAll(`input[name="${this.name}"] + span`).forEach(s => {
+        s.style.background = 'var(--glass-bg)'; s.style.color = '#E0E0E0';
+      });
+      this.nextElementSibling.style.background = '#A8BEDD';
+      this.nextElementSibling.style.color = '#FFFFFF';
+    });
+  });
+}
+
+function updateZBIProgress() {
+  let answered = 0;
+  ZBI_QUESTIONS.forEach((_, i) => {
+    if (document.querySelector(`input[name="zbi_${i}"]:checked`)) answered++;
+  });
+  const lbl = document.getElementById('zbi-progress-label');
+  const fill = document.getElementById('zbi-fill');
+  const btn = document.getElementById('zbi-submit');
+  if (lbl) lbl.textContent = `${answered} von ${ZBI_QUESTIONS.length} beantwortet`;
+  if (fill) fill.style.width = (answered / ZBI_QUESTIONS.length * 100) + '%';
+  if (btn) btn.disabled = answered < ZBI_QUESTIONS.length;
+}
+
+function calcZBI() {
+  let score = 0;
+  ZBI_QUESTIONS.forEach((_, i) => {
+    const el = document.querySelector(`input[name="zbi_${i}"]:checked`);
+    if (el) score += parseInt(el.value);
+  });
+  const result = document.getElementById('zbi-result');
+  document.getElementById('zbi-score').textContent = `Score: ${score} / 88`;
+  let level, rec, bg, border, gaugeColor, critical = false;
+  if (score <= 20) {
+    level = 'Geringe Belastung'; bg = 'rgba(168,190,221,0.10)'; border = 'rgba(168,190,221,0.3)'; gaugeColor = '#A8BEDD';
+    rec = 'Sie bewältigen die Pflegesituation gut. Achten Sie weiterhin auf Erholungsphasen und holen Sie sich Unterstützung, bevor Sie an Ihre Grenzen stoßen.';
+  } else if (score <= 40) {
+    level = 'Moderate Belastung'; bg = 'rgba(228,180,0,0.12)'; border = 'rgba(228,180,0,0.3)'; gaugeColor = '#E6ACBE';
+    rec = 'Die Pflegebelastung ist spürbar. Pflegekurse (§45 SGB XI), Kurzzeitpflege und Entlastungsangebote können gezielt helfen. Sprechen Sie mit Ihrer Pflegekasse.';
+  } else {
+    level = 'Hohe Belastung — Handlungsbedarf'; bg = 'rgba(200,60,60,0.14)'; border = 'rgba(200,60,60,0.4)'; gaugeColor = '#D32F2F'; critical = true;
+    rec = 'Sie sind stark belastet. Bitte suchen Sie umgehend Unterstützung: Sozialstation, DAlzG-Beratung (030 20 17 91-31) oder Ihrer Pflegekasse. Ihre Gesundheit hat Priorität.';
+  }
+  const gaugeFill = document.getElementById('zbi-gauge-fill');
+  const circumference = 2 * Math.PI * 34;
+  gaugeFill.style.stroke = gaugeColor;
+  gaugeFill.setAttribute('stroke-dasharray', `${circumference} ${circumference}`);
+  gaugeFill.style.transition = 'stroke-dashoffset 1s cubic-bezier(.22,1,.36,1)';
+  gaugeFill.style.strokeDashoffset = circumference - Math.min(score / 88, 1) * circumference;
+  result.classList.toggle('ci-electric', critical);
+  result.style.cssText = `display:block;background:${bg};border:1px solid ${border};border-radius:14px;padding:1.5rem;`;
+  document.getElementById('zbi-level').textContent = level;
+  document.getElementById('zbi-rec').textContent = rec;
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  // Nur die Belastungsklasse (Kategorie), kein Rohscore — Privacy-Lock analog toBelastungsklasse.
+  window.__ciAuditor?.trackInteraction('Calculator-Completion', { calculator: 'zbi22', level });
+}
+
+function resetZBI() {
+  document.querySelectorAll('[name^="zbi_"]').forEach(el => el.checked = false);
+  document.querySelectorAll('.zbi-opt').forEach(s => { s.style.background = 'var(--glass-bg)'; s.style.color = '#E0E0E0'; });
+  const result = document.getElementById('zbi-result');
+  if (result) { result.style.display = 'none'; result.classList.remove('ci-electric'); }
+  const gaugeFill = document.getElementById('zbi-gauge-fill');
+  if (gaugeFill) gaugeFill.style.strokeDashoffset = 2 * Math.PI * 34;
+  const fill = document.getElementById('zbi-fill');
+  if (fill) fill.style.width = '0%';
+  const lbl = document.getElementById('zbi-progress-label');
+  if (lbl) lbl.textContent = '0 von 22 beantwortet';
+  const btn = document.getElementById('zbi-submit');
+  if (btn) btn.disabled = true;
+}
+
+buildZBI();
+
+/* ── ZBI COLLAPSIBLE ── */
+function toggleZBI() {
+  const panel = document.getElementById('zbi-collapsible');
+  const btn   = document.getElementById('zbi-toggle-btn');
+  const open  = panel.style.display !== 'none';
+  panel.style.display = open ? 'none' : 'block';
+  btn.textContent     = open ? 'Test starten →' : 'Test ausblenden ↑';
+  if (!open) {
+    window.__ciAuditor?.trackInteraction('Calculator-Start', { calculator: 'zbi22' });
+    setTimeout(function() {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  }
+}
+
+/* ── BACK TO TOP ── */
+(function() {
+  const btn = document.getElementById('back-to-top');
+  if (!btn) return;
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 400) {
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
+  }, { passive: true });
+  btn.addEventListener('click', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+})();
+</script>
+<!-- ── CAREINSIGHT AUDITOR v39.0 (Module · Privacy-Lock · No Adea deps) ── -->
+<script type="module">
+import { InsightAuditor, toBelastungsklasse } from './src/audit/insight-auditor.js';
+import { ComplianceChecker }                  from './src/audit/compliance-checker.js';
+
+/* Init auditor — exposed on window for regular-script telemetry hooks */
+const auditor = new InsightAuditor();
+window.__ciAuditor = auditor;
+
+/* ComplianceChecker: validate PUEG 2025 on load */
+const checker = new ComplianceChecker(2025);
+const result  = checker.validate({
+  pg2_pflegegeld: 347, pg3_pflegegeld: 599, pg4_pflegegeld: 800,  pg5_pflegegeld: 990,
+  pg2_stationaer: 805, pg3_stationaer: 1319,pg4_stationaer: 1855, pg5_stationaer: 2096,
+  entlastung: 131, wohnumfeld: 4180,
+});
+auditor.track('ComplianceEvent', {
+  subtype:  'pueg_check',
+  ok:       result.ok,
+  warnings: result.warnings,
+  year:     2025,
+});
+if (!result.ok) {
+  console.warn('[CareInsight ComplianceChecker] PUEG-Abweichungen:', result.warnings);
+}
+
+/* DNQP Engagement Heatmap — IntersectionObserver */
+document.addEventListener('DOMContentLoaded', function() {
+  const dnqpCards = document.querySelectorAll('[data-standard]');
+  if (!dnqpCards.length || !('IntersectionObserver' in window)) return;
+
+  const observed = new Set();
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const std = entry.target.dataset.standard;
+        if (!observed.has(std)) {
+          observed.add(std);
+          auditor.track('EngagementEvent', {
+            subtype:  'dnqp_read',
+            standard: std,
+          });
+        }
+      }
+    });
+  }, { threshold: 0.5 });
+
+  dnqpCards.forEach(card => observer.observe(card));
+});
+
+/* Section Dwell Tracking v50 — Verweildauer pro Haupt-Sektion (inkl. Wohnformen) */
+document.addEventListener('DOMContentLoaded', function() {
+  const SECTIONS = [
+    'hero','pflegeverstaendnis','ressourcen','sicherheit','pg-rechner',
+    'wohnen','wohnen-pflegeheim','wohnen-wohngruppe','wohnen-mehrgenerationen','wohnen-haeuslich',
+    'dnqp','abo','tagesresidenz','wuerde','ethik','kontakt','download','faq'
+  ];
+  if (!('IntersectionObserver' in window)) return;
+  const sectionObs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) auditor.trackEntry(entry.target.id);
+      else                       auditor.trackExit(entry.target.id);
+    });
+  }, { threshold: 0.3 });
+  SECTIONS.forEach(id => { const el = document.getElementById(id); if (el) sectionObs.observe(el); });
+});
+
+/* Wohnform Engagement Heatmap v50 — data-wohnform cards */
+document.addEventListener('DOMContentLoaded', function() {
+  const wohnCards = document.querySelectorAll('[data-wohnform]');
+  if (!wohnCards.length || !('IntersectionObserver' in window)) return;
+  const viewedForms = new Set();
+  const wohnObs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const form = entry.target.dataset.wohnform;
+        if (!viewedForms.has(form)) {
+          viewedForms.add(form);
+          auditor.track('WohnformEvent', { subtype: 'wohnform_view', wohnform: form });
+        }
+      }
+    });
+  }, { threshold: 0.4 });
+  wohnCards.forEach(card => wohnObs.observe(card));
+});
+
+/* Export helper — accessible from browser console */
+window.__ciAuditExport = () => auditor.downloadLog();
+</script>
+
+<!-- ── FLYER LIGHTBOX MODAL ── -->
+<div id="flyer-modal" role="dialog" aria-modal="true" aria-label="Flyer: Die Tagesresidenz — Würdevoller Alltag" onclick="closeFlyerModal()">
+  <button id="flyer-modal-close" onclick="closeFlyerModal()" aria-label="Schließen">✕</button>
+  <img src="assets/infografik-tagesresidenz.png"
+       alt="Flyer: Die Tagesresidenz — Würdevoller Alltag in voller Auflösung."
+       onclick="event.stopPropagation()">
+</div>
+</body>
+</html>
