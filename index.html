@@ -336,8 +336,8 @@
       transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease, border-color .3s ease;
       transform-style: preserve-3d;
     }
-    .charta-card:hover { transform: perspective(600px) rotateX(4deg) rotateY(-2deg) translateY(-4px) scale(1.02); box-shadow: 0 24px 48px rgba(168,190,221,0.32), 0 0 22px rgba(168,190,221,0.28); border-color: #A8BEDD; }
-    .charta-card:active { transform: perspective(800px) rotateX(2deg) scale(0.96); box-shadow: 0 8px 20px rgba(168,190,221,0.35); border-color: #A8BEDD; }
+    .charta-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 24px 48px rgba(168,190,221,0.32), 0 0 22px rgba(168,190,221,0.28); border-color: #A8BEDD; }
+    .charta-card:active { transform: scale(0.96); box-shadow: 0 8px 20px rgba(168,190,221,0.35); border-color: #A8BEDD; }
     .charta-card.expanded { border-color:#E0E0E0; }
     .charta-card .art-num { font-size: 1.25rem; font-weight: 800; color:#E0E0E0; margin-bottom: 0.35rem; line-height: 1; }
     .charta-card h3 { font-size: 0.92rem; font-weight: 700; color:#E0E0E0; margin-bottom: 0.5rem; line-height: 1.3; }
@@ -558,8 +558,8 @@
     .wohn-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5rem; margin-top:2rem; }
     .wohn-card { position:relative; overflow:hidden; background: rgba(19,27,39,0.55); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border:1px solid rgba(124,147,184,0.16); border-radius:16px; padding:1.5rem; transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease, border-color .3s ease; transform-style: preserve-3d; box-shadow: -6px -6px 10px rgba(124,147,184,0.22), 22px 22px 40px rgba(0,0,0,0.65); }
     .wohn-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); z-index:1; }
-    .wohn-card:hover { transform: perspective(600px) rotateX(4deg) rotateY(-2deg) translateY(-4px) scale(1.02); box-shadow: 0 24px 48px rgba(168,190,221,0.32), 0 0 22px rgba(168,190,221,0.28); border-color: #A8BEDD; }
-    .wohn-card:active { transform: perspective(800px) rotateX(2deg) scale(0.96); box-shadow: 0 8px 20px rgba(168,190,221,0.35); border-color: #A8BEDD; }
+    .wohn-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 24px 48px rgba(168,190,221,0.32), 0 0 22px rgba(168,190,221,0.28); border-color: #A8BEDD; }
+    .wohn-card:active { transform: scale(0.96); box-shadow: 0 8px 20px rgba(168,190,221,0.35); border-color: #A8BEDD; }
     @keyframes iconPop { 0%,100% { transform: scale(1) rotate(0deg); } 35% { transform: scale(1.28) rotate(-10deg); } 65% { transform: scale(1.1) rotate(7deg); } }
     @keyframes iconFloat { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-5px) rotate(3deg); } }
     .wohn-icon, .abo-app-icon, .wuerde-icon, .contact-icon, .card-emoji {
