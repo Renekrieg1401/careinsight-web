@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <meta name="theme-color" content="#131B27" />
+  <meta name="theme-color" content="#2B4570" />
   <title>CareInsight — Der Blick hinter die Pflege</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
@@ -16,16 +16,16 @@
        iris-web/index.html umgesetzt (echtes FORMA-Standard-Dark-Theme,
        s. forma/DesignTokens.ts). Rollennamen unverändert, nur Werte getauscht. */
     :root {
-      --mint:      #1B2535;
+      --mint:      #3A5680;
       --mint-primary: #A8BEDD;
       --mid:       #5B7290;
       --petrol:    #FFFFFF;
       --petrol-dk: #E0E0E0;
       --text:      #E0E0E0;
-      --white:     #253144;
+      --white:     #46608C;
       --lime:      #E6ACBE;
       --max-w:     1080px;
-      --glass-bg:  rgba(19,27,39,0.55);
+      --glass-bg:  rgba(43,69,112,0.55);
       --glass-bd:  rgba(124,147,184,0.16);
     }
 
@@ -49,7 +49,7 @@
     /* ── FORMA NEUMORPH CARD (2026-09-14, analog iris-web .lw-card) ── */
     .glass {
       position: relative; overflow: hidden;
-      background: rgba(19,27,39,0.55);
+      background: rgba(43,69,112,0.55);
       backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(124,147,184,0.16);
       border-radius: 16px;
@@ -83,7 +83,7 @@
     }
     .site-header::before {
       content: ''; position: absolute; inset: -20%; z-index: -1;
-      background: linear-gradient(120deg, #131B27, #1B2535, #2B4570, #131B27);
+      background: linear-gradient(120deg, #2B4570, #3A5680, #2B4570, #2B4570);
       background-size: 300% 300%; opacity: 0.15;
     }
     .site-header::after {
@@ -258,7 +258,7 @@
       border: 1px solid var(--glass-bd);
     }
     .abo-left {
-      background: rgba(19,27,39,0.55);
+      background: rgba(43,69,112,0.55);
       
       padding: 2rem 2.25rem;
       border-right: 1px solid var(--glass-bd);
@@ -302,7 +302,7 @@
     }
     .wuerde-card {
       padding: 1.4rem;
-      background: rgba(19,27,39,0.35);
+      background: rgba(43,69,112,0.35);
       
       border: 1.5px solid #5B7290;
       border-radius: 14px;
@@ -312,7 +312,7 @@
     .wuerde-card h3 { color: var(--petrol); font-size: 1rem; }
     .wuerde-card p { font-size: 0.855rem; color:var(--text); line-height: 1.55; }
     .wuerde-quote {
-      background: rgba(19,27,39,0.45); border:1px solid rgba(224,224,224,0.25);
+      background: rgba(43,69,112,0.45); border:1px solid rgba(224,224,224,0.25);
       border-left: 4px solid var(--petrol); border-radius: 0 12px 12px 0;
       padding: 1rem 1.25rem; margin-bottom: 1.5rem;
     }
@@ -556,7 +556,7 @@
     .sub-section-label { font-size:0.72rem; font-weight:700; color:var(--petrol); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.6rem; }
     /* ── Wohnen & Versorgung (v50) ────────────────────────────────────────── */
     .wohn-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5rem; margin-top:2rem; }
-    .wohn-card { position:relative; overflow:hidden; background: rgba(19,27,39,0.55); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border:1px solid rgba(124,147,184,0.16); border-radius:16px; padding:1.5rem; transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease, border-color .3s ease; transform-style: preserve-3d; box-shadow: -6px -6px 10px rgba(124,147,184,0.22), 22px 22px 40px rgba(0,0,0,0.65); }
+    .wohn-card { position:relative; overflow:hidden; background: rgba(43,69,112,0.55); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border:1px solid rgba(124,147,184,0.16); border-radius:16px; padding:1.5rem; transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease, border-color .3s ease; transform-style: preserve-3d; box-shadow: -6px -6px 10px rgba(124,147,184,0.22), 22px 22px 40px rgba(0,0,0,0.65); }
     .wohn-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); z-index:1; }
     .wohn-card:hover { transform: perspective(600px) rotateX(4deg) rotateY(-2deg) translateY(-4px) scale(1.02); box-shadow: 0 24px 48px rgba(168,190,221,0.32), 0 0 22px rgba(168,190,221,0.28); border-color: #A8BEDD; }
     .wohn-card:active { transform: perspective(800px) rotateX(2deg) scale(0.96); box-shadow: 0 8px 20px rgba(168,190,221,0.35); border-color: #A8BEDD; }
@@ -597,7 +597,7 @@
     .content-with-sidebar { display:block; }
     .resource-sidebar {
       display:none; flex-direction:column; gap:1rem; z-index:50;
-      background:rgba(19,27,39,0.40);
+      background:rgba(43,69,112,0.40);
       backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
       border:1px solid rgba(124,147,184,0.16);
       box-shadow:-6px -6px 10px rgba(124,147,184,0.22), 22px 22px 40px rgba(0,0,0,0.65);
@@ -623,8 +623,8 @@
     #zbi-result.ci-electric { border:2px solid #A8BEDD !important; animation:ci-electric 1.4s ease-in-out infinite; }
     .ci-gauge-wrap { display:flex; align-items:center; gap:1rem; }
     .ci-toggle { display:inline-flex; align-items:center; gap:0.55rem; cursor:pointer; user-select:none; }
-    .ci-toggle .track { width:46px; height:24px; border-radius:999px; position:relative; background:linear-gradient(180deg,#17273F,#131B27); border:1px solid rgba(0,0,0,0.6); box-shadow:inset 0 2px 4px rgba(0,0,0,0.6), inset 0 -1px 0 rgba(255,255,255,0.04); transition:box-shadow .25s ease; }
-    .ci-toggle .knob { position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%; background:linear-gradient(180deg,#5B7290,#253144); box-shadow:0 2px 3px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15); transition:left .25s cubic-bezier(.22,1,.36,1); }
+    .ci-toggle .track { width:46px; height:24px; border-radius:999px; position:relative; background:linear-gradient(180deg,#17273F,#2B4570); border:1px solid rgba(0,0,0,0.6); box-shadow:inset 0 2px 4px rgba(0,0,0,0.6), inset 0 -1px 0 rgba(255,255,255,0.04); transition:box-shadow .25s ease; }
+    .ci-toggle .knob { position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%; background:linear-gradient(180deg,#5B7290,#46608C); box-shadow:0 2px 3px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15); transition:left .25s cubic-bezier(.22,1,.36,1); }
     .ci-toggle .led { position:absolute; top:50%; right:4px; transform:translateY(-50%); width:6px; height:6px; border-radius:50%; background:#D32F2F; box-shadow:0 0 4px #D32F2F; }
     .ci-toggle.on .track { box-shadow:inset 0 2px 4px rgba(0,0,0,0.6), 0 0 10px rgba(168,190,221,0.5); }
     .ci-toggle.on .knob { left:24px; }
@@ -958,7 +958,7 @@
               <div style="font-size:0.6rem;font-weight:800;color:#E0E0E0;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem;">🏥 SGB XI · Pflegekasse</div>
               <div style="font-size:0.72rem;color:var(--text);line-height:1.5;"><strong>Pflegebett</strong><br/><strong>Lagerungshilfen</strong><br/><strong>Sturzschutz</strong><br/><span style="font-size:0.65rem;opacity:0.8;">pflegebedingt · max. 25 € Zuzahlung</span></div>
             </div>
-            <div style="background:rgba(19,27,39,0.35);border:2px solid #5B7290;border-top:3px solid #5B7290;border-radius:8px;padding:0.75rem 0.9rem;">
+            <div style="background:rgba(43,69,112,0.35);border:2px solid #5B7290;border-top:3px solid #5B7290;border-radius:8px;padding:0.75rem 0.9rem;">
               <div style="font-size:0.6rem;font-weight:800;color:#E0E0E0;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem;">💊 SGB V · Krankenkasse</div>
               <div style="font-size:0.72rem;color:var(--text);line-height:1.5;"><strong>Rollstuhl</strong><br/><strong>Gehhilfen</strong><br/><strong>Orthesen</strong><br/><span style="font-size:0.65rem;opacity:0.8;">ärztlich verordnet · kein Eigenanteil</span></div>
             </div>
@@ -1392,7 +1392,7 @@
         <div style="font-size:0.76rem;color:var(--text);line-height:1.55;margin-bottom:0.5rem;">Die Tagesresidenz überbrückt die Zeit, in der Angehörige arbeiten oder sich erholen müssen. Sie schafft <strong>Qualitätszeit statt Pflege-Last</strong>: Wenn Angehörige zurückkehren, begegnen sie einem Menschen — nicht einem Pflegefall.</div>
         <div style="display:flex;align-items:center;gap:0.3rem;font-size:0.65rem;font-weight:700;flex-wrap:wrap;">
           <span style="background:#E0E0E0;color:#fff;border-radius:4px;padding:0.2rem 0.45rem;">Autonomie · Gast</span>
-          <span style="color:#5B7290;font-size:0.9rem;">⟷</span>
+          <span style="color:#D2DBEC;font-size:0.9rem;">⟷</span>
           <span style="background:#5B7290;color:#FFFFFF;border-radius:4px;padding:0.2rem 0.45rem;">Qualitätszeit · Angehörige</span>
         </div>
       </div>
@@ -1531,7 +1531,7 @@
 <section id="ethik">
   <div class="container">
 
-    <div style="background:rgba(19,27,39,0.55);border:1px solid rgba(224,224,224,0.25);border-radius:14px;padding:1.5rem 1.75rem;margin-bottom:1.5rem;">
+    <div style="background:rgba(43,69,112,0.55);border:1px solid rgba(224,224,224,0.25);border-radius:14px;padding:1.5rem 1.75rem;margin-bottom:1.5rem;">
       <p class="section-label" style="color:#E0E0E0;">Ethik &amp; Charta · BMFSFJ 2020</p>
       <h2 style="margin-bottom:0.75rem;">Die 8 Grundrechte in der Pflege.</h2>
       <p class="lead">Die Pflege-Charta definiert unveräußerliche Rechte — verbindlich für alle, die pflegen. Karte antippen für den vollständigen Artikel.</p>
@@ -1868,7 +1868,7 @@
 <!-- ═══════════════════════════════════════ FOOTER ═══ -->
 <footer>
   <div class="footer-claim">CareInsight — die Seite die Hilft</div>
-  <p style="font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#5B7290;margin-bottom:0.5rem;">🧪 Development Preview — Zahlungsabwicklung noch nicht live</p>
+  <p style="font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#D2DBEC;margin-bottom:0.5rem;">🧪 Development Preview — Zahlungsabwicklung noch nicht live</p>
   <p>© 2026 IRIS Digital · René Krieg &nbsp;·&nbsp;
      <a href="mailto:r.krieg.home@gmail.com">r.krieg.home@gmail.com</a>
   </p>
