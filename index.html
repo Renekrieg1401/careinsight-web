@@ -370,7 +370,7 @@
     }
     .pg-btn:hover { background:rgba(224,224,224,0.1); }
     .pg-btn:active { background:rgba(224,224,224,0.22); transform: scale(0.96); }
-    .pg-btn.active { background: #E0E0E0; color: #fff; border-color:#E0E0E0; }
+    .pg-btn.active { background: #E0E0E0; color: #fff; border-color:#E0E0E0; transform: translateY(-3px) scale(1.05); box-shadow: -3px -3px 6px rgba(224,224,224,0.35), 4px 6px 12px rgba(0,0,0,0.55); }
     .pg-benefits-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -2116,6 +2116,17 @@ function selectPG(grade) {
   document.getElementById('pg-placeholder').style.display = 'none';
   window.__ciAuditor?.track('InteractionEvent', { subtype: 'PG-Rechner', grade });
 }
+
+// Tap auf Freiflaeche (ausserhalb des PG-Rechners) setzt die Auswahl zurueck
+document.addEventListener('click', (e) => {
+  const rechner = document.getElementById('pg-rechner');
+  if (!rechner || rechner.contains(e.target)) return;
+  const aktiverBtn = rechner?.querySelector('.pg-btn.active');
+  if (!aktiverBtn) return;
+  document.querySelectorAll('.pg-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('pg-benefits').style.display = 'none';
+  document.getElementById('pg-placeholder').style.display = 'block';
+});
 
 // Versucht zuerst die echte Stripe-Checkout-Session (careinsight/server/ /api/create-checkout-session).
 // Solange kein Server deployt/kein echter Stripe-Key hinterlegt ist, schlägt der Call fehl —
